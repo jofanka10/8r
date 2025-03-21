@@ -106,7 +106,7 @@ on_the_run() {
 # Fungsi untuk menjalankan program "Time and Date"
 Time() {
     echo "Menjalankan Time..."
-
+    # menjalankan fungsi time
     clear
 
     while true; do
