@@ -127,3 +127,61 @@ dimana cara kerjanya sebagai berikut.
 2. Program akan memunculkan UI kepada client.
 3. Setelah server menerima input dari client, maka input dari client akan diproses menggunakan switch case.
 4. Jika player salah input ke server, maka switch case default dijalankan.
+
+**n) Show Player Stats**
+Show player stats adalah informasi untuk melihat atribut yang digunakan oleh player. Untuk kodenya seperti ini
+
+    char msg[4096];
+    snprintf(msg, sizeof(msg),
+        "\033c\033[3J"
+        "\033[38;2;105;210;82m=== PLAYER STATS ===\e[0m\n\n"
+        "\033[38;2;243;177;68mGold: %d\e[0m\n"
+        "Equipped: %s\n"
+        "\033[38;2;226;79;65mBase damage: %d\e[0m\n"
+        "\033[38;2;127;217;241mEnemies defeated: %d\e[0m\n"
+        "Passive: %s\n\n"
+        "\033[38;2;243;177;68mPress enter to return...\e[0m ",
+        player.gold, player.equipped.name,
+        player.base_damage, player.enemies_defeated,
+        player.equipped.passive);
+
+    send(client_socket, msg, strlen(msg), 0);
+    memset(buf, 0, sizeof(buf));
+    valread = read(client_socket, buf, sizeof(buf)); // tunggu ENTER
+    break;
+
+dimana cara kerjanya sebagai berikut.
+1. Program membuat array.
+2. ```Snprinf``` digunakan untuk menginput data tertentu seperti UI dan informasi player.
+3. Server mengirimkan array tadi ke client menggunakan send.
+4. ```memset``` diperlukan untuk menghindari input maupun output yang tidak diinginkan.
+5. Setelah itu, jika user menginputkan ```ENTER```, maka setelah itu switch case akan berhenti.
+
+**n) Inventory**
+Sama seperti shoe player stats, inventory digunakan untuk menampilkan persediaan yang dimiliki player. Untuk kodenya seperti ini
+
+    char msg[4096];
+    msg[0] = '\0'; // inisialisasi string kosong
+
+    snprintf(msg, sizeof(msg), "\033c\033[3J\033[38;2;105;210;82m=== INVENTORY ===\e[0m\n\n");
+    for (int i = 0; i < player.inventory_count; i++)
+    {
+        char temp[100];
+        snprintf(temp, sizeof(temp), "%d. %s - \033[38;2;226;79;65mDamage: %d\e[0m - Passive: %s\n",
+            i+1, player.inventory[i].name, player.inventory[i].damage,
+            player.inventory[i].passive);
+        strncat(msg, temp, sizeof(msg) - strlen(msg) - 1);
+    }
+    strncat(msg, "\n\033[38;2;243;177;68mPress enter to return..\e[0m ", sizeof(msg) - strlen(msg) - 1);
+
+    send(client_socket, msg, strlen(msg), 0);
+    memset(buf, 0, sizeof(buf));
+    valread = read(client_socket, buf, sizeof(buf)); // tunggu ENTER
+    break;
+
+dimana cara kerjanya sebagai berikut.
+1. Program membuat array.
+2. ```Snprinf``` digunakan untuk menginput data tertentu seperti UI dan informasi persediaan player.
+3. Server mengirimkan array tadi ke client menggunakan send.
+4. ```memset``` diperlukan untuk menghindari input maupun output yang tidak diinginkan.
+5. Setelah itu, jika user menginputkan ```ENTER```, maka setelah itu switch case akan berhenti.
