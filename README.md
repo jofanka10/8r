@@ -472,4 +472,163 @@ dimana cara kerjanya seperti ini.
 7. Jika player salah memasukkan input, maka server akan mengirim pesan bahwa input salah.
 8. JIka player ingin keluar dari Battle Mode, maka player dapat mengetik `exit` dan menekan `ENTER`.
 
-9. 
+**10) `int main()`**
+
+Fungsi `int main()` digunakan sebagai program utamanya. Untuk kodenya seperti ini
+    
+    int main()
+    {
+        int new_socket;
+        int sfd = socket(AF_INET, SOCK_STREAM, 0);
+        if (sfd == -1)
+        {
+            perror("Socket failed");
+            return -1;
+        }
+    
+        struct sockaddr_in addr;
+        memset(&addr, 0, sizeof(addr));
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(PORT);
+        addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        socklen_t addrlen = sizeof(addr);
+        
+        if(bind(sfd, (struct sockaddr*)&addr, sizeof(addr)) == -1)
+        {
+            perror("Bind failed");
+            return -1;
+        }
+    
+        if (listen(sfd, 1) == -1)
+        {
+            perror("Listen failed");
+            return -1;
+        }
+    
+        printf("The server is up on port %d\n", PORT);
+    
+        while(1)
+        {
+            new_socket = accept(sfd, (struct sockaddr *)&addr, &addrlen);
+            if (new_socket < 0)
+            {
+                perror("Accept");
+                return -1;
+            }
+    
+            printf("Player has connected to the server.\n");
+    
+            pid_t pid = fork();
+            if(pid == 0)
+            {
+                close(sfd);
+                handle_client(new_socket);
+                exit(0);
+            }
+            else if (pid < 0)
+            {
+                perror("Fork failed");
+            }
+            close(new_socket);
+        }
+    }
+    
+Untuk cara kerjanya sebagai berikut.
+1. Program menjalakan fungsi socket sebagai server.
+2. Jika dalam prosesnya ada yang tidak berhasil, maka muncul pesan sesuai proses yang gagal tersebut.
+3. Jika berhasil, maka muncul pesan `The server is up on port %d` di server.
+4. Jika client berhasil connect, maka muncul pesan `Player has connected to the server.`.
+5. Setelah itu, fungsi `handle_client()` dijalankan menggunakn pid.
+6. Jika client berhasil disconnect, maka muncul pesan `Player has disconnected to the server.`.
+
+### b. Shop.c
+Shop.c digunakan sebagai database toko. Untuk atribut yang digunakan menggunakan struct. Untuk kodenya seperti ini
+
+    #include <stdio.h>
+    #include <string.h>
+    
+    typedef struct 
+    {
+        char name[100];
+        int price;
+        int damage;
+        char passive[50];
+    } Weapon;
+    
+    Weapon weapons[] = 
+    {
+        {"\033[38;5;203m硬化 (hardening)\e[0m", 400, 200, "None"},
+        {"\033[38;5;98m黒影 (dark Shadow)\e[0m", 650, 350, "None"},
+        {"\033[38;5;153m半冷半燃\e[0m \033[38;5;209m(Half-cool, half-burn)\e[0m", 750, 450, "\033[38;5;153mFreeze\e[0m"},
+        {"\033[38;5;222m爆破 (Exploison)\e[0m", 850, 475, "\033[38;5;222mAcid Sweat\e[0m"},
+        {"\033[38;2;158;253;209mワン・フォー・オール (One For All)\e[0m", 1000, 500, "\033[38;2;158;253;209mDetroit smash\e[0m"}
+    };
+    
+    int total_weapons = 5;
+    
+    void show_shop() 
+    {
+        printf("\n=== Weapon Shop ===\n");
+        for (int i = 0; i < total_weapons; i++) {
+            printf("%d. %s - \033[38;2;243;177;68mPrice: %d Gold\e[0m - Damage: %d - Passive: %s\n",
+                   i+1, weapons[i].name, weapons[i].price, weapons[i].damage, weapons[i].passive);
+        }
+        printf("===================\n");
+    }
+    
+    Weapon buy_weapon(int choice) 
+    {
+        if (choice < 1 || choice > total_weapons) 
+        {
+            Weapon empty = {"", 0, 0, ""};
+            return empty;
+        }
+        return weapons[choice-1];
+    }
+
+### player.c
+Player.c bekerja sebagai client. Untuk kodenya seperti ini
+
+    #include <stdio.h>
+    #include <string.h>
+    #include <unistd.h>
+    #include <arpa/inet.h>
+    #define PORT 8080
+    
+    int main()
+    {
+        int sock = socket(AF_INET, SOCK_STREAM, 0);
+        // struct sockaddr_in serv = {AF_INET, htons(PORT)};
+    
+        struct sockaddr_in serv;
+        memset(&serv, 0, sizeof(serv));
+        serv.sin_family = AF_INET;
+        serv.sin_port = htons(PORT);
+        serv.sin_addr.s_addr = htonl(INADDR_ANY);
+        socklen_t addrlen = sizeof(serv);
+        
+        inet_pton(AF_INET, "127.0.0.1", &serv.sin_addr);
+        connect(sock, (struct sockaddr*)&serv, sizeof(serv));
+    
+        char buf[4096] = {0};
+        while(1)
+        {
+            memset(buf, 0, sizeof(buf));
+            int bytes_read = read(sock, buf, sizeof(buf));
+            printf("%s\n", buf);
+    
+    
+            // meminta input user
+            char input[400] = {0};
+            fgets(input, sizeof(input), stdin);
+            send(sock, input, strlen(input), 0);
+            if (input[0] == 'x') break;
+        }
+    
+    
+        close(sock);
+        return 0;
+    }
+    
+dimana cara kerjanya sebagai berikut.
+1. 
