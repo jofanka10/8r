@@ -55,6 +55,7 @@ Fungsi ini digunakan untuk menghapus karakter tertentu, seperti ```"\n"```, ```"
     }
 
 **n) Fungsi ```handle_client```
+
 Fungsi ini digunakan untuk menjalankan keseluruhan fungsi UI dan cara program bekerja. Untuk kodenya seperti ini
 
     void handle_client(int client_socket)
@@ -129,6 +130,7 @@ dimana cara kerjanya sebagai berikut.
 4. Jika player salah input ke server, maka switch case default dijalankan.
 
 **n) Show Player Stats**
+
 Show player stats adalah informasi untuk melihat atribut yang digunakan oleh player. Untuk kodenya seperti ini
 
     char msg[4096];
@@ -152,12 +154,13 @@ Show player stats adalah informasi untuk melihat atribut yang digunakan oleh pla
 
 dimana cara kerjanya sebagai berikut.
 1. Program membuat array.
-2. ```Snprinf``` digunakan untuk menginput data tertentu seperti UI dan informasi player.
+2. ```snprinf``` digunakan untuk menginput data tertentu seperti UI dan informasi player.
 3. Server mengirimkan array tadi ke client menggunakan send.
 4. ```memset``` diperlukan untuk menghindari input maupun output yang tidak diinginkan.
 5. Setelah itu, jika user menginputkan ```ENTER```, maka setelah itu switch case akan berhenti.
 
 **n) Inventory**
+
 Sama seperti shoe player stats, inventory digunakan untuk menampilkan persediaan yang dimiliki player. Untuk kodenya seperti ini
 
     char msg[4096];
@@ -181,7 +184,69 @@ Sama seperti shoe player stats, inventory digunakan untuk menampilkan persediaan
 
 dimana cara kerjanya sebagai berikut.
 1. Program membuat array.
-2. ```Snprinf``` digunakan untuk menginput data tertentu seperti UI dan informasi persediaan player.
+2. ```snprinf``` digunakan untuk menginput data tertentu seperti UI dan informasi persediaan player.
 3. Server mengirimkan array tadi ke client menggunakan send.
 4. ```memset``` diperlukan untuk menghindari input maupun output yang tidak diinginkan.
 5. Setelah itu, jika user menginputkan ```ENTER```, maka setelah itu switch case akan berhenti.
+
+**n) Shop**
+
+Pada switch case shop digunakan untuk memunculkan item di shop yang dapat dibeli oleh player. Untuk kodenya seperti ini
+
+    char msg[4096];
+    snprintf(msg, sizeof(msg), "\033c\033[3J\033[38;2;105;210;82mWelcome to the shop!\e[0m\n\033[38;2;243;177;68mYour gold:\e[0m %d\n\n", player.gold);
+    for (int i = 0; i < total_weapons; i++)
+    {
+        char weapon_msg[256];
+        snprintf (weapon_msg, sizeof(weapon_msg), "%d. %s | \033[38;2;243;177;68mPrice: %d Gold\e[0m | \033[38;2;226;79;65mDamage: %d\e[0m | Passive: %s\n",
+            i + 1, weapons[i].name, weapons[i].price, weapons[i].damage, weapons[i].passive);
+        strncat(msg, weapon_msg, sizeof(msg) - strlen(msg) - 1);
+    }
+    strncat(msg, "\n\033[38;2;243;177;68mEnter the weapon you want to purchase (or 0 to cancel): \e[0m", sizeof(msg) - strlen(msg) - 1);
+
+    send(client_socket, msg, strlen(msg), 0);
+
+    memset(buf, 0, sizeof(buf));
+    valread = read(client_socket, buf, sizeof(buf));
+    if(valread <= 0) break; // client disconnect
+
+    int choice = atoi(buf);
+    if (choice == 0) break;
+
+    Weapon selected = buy_weapon(choice);
+
+    if (strlen(selected.name) == 0)
+    {
+        const char error[] = "\033[38;2;226;79;65mInvalid choice. Press enter to return...\e[0m ";
+        send(client_socket, error, strlen(error), 0);
+        memset(buf, 0, sizeof(buf));
+        valread = read(client_socket, buf, sizeof(buf));
+        break;
+    }
+
+    if (player.gold >= selected.price)
+    {
+        player.gold -= selected.price;
+        player.inventory[player.inventory_count++] = selected;
+
+        char success[256];
+        snprintf(success, sizeof(success),
+            "\033[38;2;243;177;68mSuccessfully purchased %s for %d gold!\nPress enter to return...\e[0m ",
+            selected.name, selected.price);
+        send(client_socket, success, strlen(success), 0);
+    }
+    else
+    {
+        const char failed[] = "\033[38;2;226;79;65mNot enough gold! Press enter to return...\e[0m ";
+        send(client_socket, failed, strlen(failed), 0);
+    }
+    memset(buf, 0, sizeof(buf));
+    valread = read(client_socket, buf, sizeof(buf)); // tunggu ENTER
+    break;
+
+dimana dcara kerja dari kodenya seperti ini.
+1. Server mengirimkan tampilan shop kepada client dan meminta untuk client jika ingin membeli item.
+2. Jika client memasukkan nomor item tertentu, maka server akan mengecek apakah gold yang dimiliki player sudah cukup.
+3. Jika gold mencukupi, maka item dapat dibeli oleh player dan memasukkannnya ke dalam inventory.
+4. Jika gold tidak mencukupi, maka server mengirim pesan kepada client bahwa gold tidak mencukupi.
+5. Jika player ingin keluar dari shop, maka player dapat menginput ```0``` dan `ENTER` kepada server.  
