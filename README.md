@@ -14,6 +14,35 @@ Untuk library yang digunakan yaitu library standar, `<arpa/inet.h>`, `<time.h>`,
     #include <arpa/inet.h>
     #include "shop.c"
 
+**2) Main Menu**
+
+Fungsi ini digunakan untuk menampilkan UI main menu. Untuk kodenya seperti ini
+    
+    void display_menu(int client_socket)
+    {
+        // mengirimkan text ke client
+        char menu[] = 
+            "\033c\033[3J"
+            "\033[38;2;255;0;0m  Welcome to My Hero Academia   \e[0m\n"
+            "\033[38;2;255;250;0m僕のヒーローアカデミアへようこそ\e[0m\n\n"
+            "\033[38;2;105;210;82m=== Main Menu ===\e[0m\n"
+            "1. Show Player Stats\n"
+            "2. View Inventory\n"
+            "3. Shop\n"
+            "4. Equip Weapon\n"
+            "5. Battle Mode\n"
+            "6. About\n"
+            "x. Exit\e[0m\n"
+            "\033[38;2;105;210;82m=================\n"
+            "Choice: \e[0m";
+        send(client_socket, menu, strlen(menu), 0);
+    }
+
+dimana untuk cara kerjanya seperti ini.
+1. `"\033c\033[3J"` adalah kode untuk clear screen agar tampilan lebih rapih. Kode ini berlaku di beberapa fungsi lain.
+2. `\033[38;2;255;0;0m` adalah kode warna, dimana output akan memuncukan warna yang berbeda dan diakhiri dengan `\e[0m`.
+3. Untuk mengirimkan output ke client, diguankan fungsi `send()`.
+
 **3) Struct**
 
 Struct digunakan untuk memuat artibut data player dan musuh. Untuk kodenya seperti ini
@@ -160,7 +189,7 @@ dimana cara kerjanya sebagai berikut.
 2. `snprinf` digunakan untuk menginput data tertentu seperti UI dan informasi player.
 3. Server mengirimkan array tadi ke client menggunakan send.
 4. `memset` diperlukan untuk menghindari input maupun output yang tidak diinginkan.
-5. Setelah itu, jika user menginputkan `ENTER`, maka setelah itu switch case akan berhenti.
+5. Setelah itu, jika player menginputkan `ENTER`, maka setelah itu switch case akan berhenti.
 
 **7) Inventory**
 
@@ -193,7 +222,7 @@ dimana cara kerjanya sebagai berikut.
 2. `snprinf` digunakan untuk menginput data tertentu seperti UI dan informasi persediaan player.
 3. Server mengirimkan array tadi ke client menggunakan send.
 4. `memset` diperlukan untuk menghindari input maupun output yang tidak diinginkan.
-5. Setelah itu, jika user menginputkan `ENTER`, maka setelah itu switch case akan berhenti.
+5. Setelah itu, jika player menginputkan `ENTER`, maka setelah itu switch case akan berhenti.
 
 **8) Shop**
 
@@ -534,7 +563,7 @@ Fungsi `int main()` digunakan sebagai program utamanya. Untuk kodenya seperti in
     }
     
 Untuk cara kerjanya sebagai berikut.
-1. Program menjalakan fungsi socket sebagai server.
+1. Program menjalankan fungsi socket sebagai server secara RPC.
 2. Jika dalam prosesnya ada yang tidak berhasil, maka muncul pesan sesuai proses yang gagal tersebut.
 3. Jika berhasil, maka muncul pesan `The server is up on port %d` di server.
 4. Jika client berhasil connect, maka muncul pesan `Player has connected to the server.`.
@@ -586,6 +615,8 @@ Shop.c digunakan sebagai database toko. Untuk atribut yang digunakan menggunakan
         return weapons[choice-1];
     }
 
+dimana utnuk fungsi buy_weapon akan bekerja ketika player sedang membeli weapon.
+
 ### player.c
 Player.c bekerja sebagai client. Untuk kodenya seperti ini
 
@@ -618,7 +649,7 @@ Player.c bekerja sebagai client. Untuk kodenya seperti ini
             printf("%s\n", buf);
     
     
-            // meminta input user
+            // meminta input player
             char input[400] = {0};
             fgets(input, sizeof(input), stdin);
             send(sock, input, strlen(input), 0);
@@ -631,4 +662,9 @@ Player.c bekerja sebagai client. Untuk kodenya seperti ini
     }
     
 dimana cara kerjanya sebagai berikut.
-1. 
+1. Client mengguakan sock untuk bekerja secara RPC.
+2. Client connect ke server, jika berhasil, maka tampilan UI dari server langsung muncul.
+3. Jika player telah exit menggunakan `x`, maka program akan berhenti.
+
+
+### d. Output
