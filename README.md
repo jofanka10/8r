@@ -669,22 +669,31 @@ dimana cara kerjanya sebagai berikut.
 
 ### d. Output
 1) Output dari server selama proses berlangsung seperti ini
+![Image](https://github.com/user-attachments/assets/8f4bc83c-bfd3-4290-8135-dbd5b313d7bd)
 
 2) Untuk tampilan main menu seperti ini
+![Image](https://github.com/user-attachments/assets/5893dfe9-cf7d-4610-bdf3-efecfc83bce7)
 
 3) Untuk show player stats seperti ini
+![Image](https://github.com/user-attachments/assets/35371760-f528-4a6c-b486-93166e22ad1c)
 
 4) Untuk inventory seperti ini
+![Image](https://github.com/user-attachments/assets/76691d25-bd35-4405-9a1a-26bc150f1200)
 
 5) Untuk tampilan shop seperti ini
+![Image](https://github.com/user-attachments/assets/27887e07-af3d-43ca-93cc-64b11e8330fb)
 
 6) Untuk tampilan equip weapon seperti ini
+![Image](https://github.com/user-attachments/assets/bb354eab-aefc-4257-8215-2365b39d5dde)
 
 7) Untuk tampilan battle mode (awal) seperti ini
+![Image](https://github.com/user-attachments/assets/d36d3476-5247-4755-b6e5-b97a9ec4019a)
 
 8) Jika hp musuh habis, maka tempilannya seperti ini
+![Image](https://github.com/user-attachments/assets/296c6126-660b-4dbd-b700-1a2d91014855)
 
 9) Jika passive aktif, muncul tampilan seperti ini
+![Image](https://github.com/user-attachments/assets/be829f64-94a7-43de-b3f5-59b08a5ed161)
 
 10) Untuk about (tambahan) muncul seperti ini
-
+![Image](https://github.com/user-attachments/assets/e556071c-e93a-4d8f-a99c-82c61de1f501)
