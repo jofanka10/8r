@@ -668,3 +668,23 @@ dimana cara kerjanya sebagai berikut.
 
 
 ### d. Output
+1) Output dari server selama proses berlangsung seperti ini
+
+2) Untuk tampilan main menu seperti ini
+
+3) Untuk show player stats seperti ini
+
+4) Untuk inventory seperti ini
+
+5) Untuk tampilan shop seperti ini
+
+6) Untuk tampilan equip weapon seperti ini
+
+7) Untuk tampilan battle mode (awal) seperti ini
+
+8) Jika hp musuh habis, maka tempilannya seperti ini
+
+9) Jika passive aktif, muncul tampilan seperti ini
+
+10) Untuk about (tambahan) muncul seperti ini
+
