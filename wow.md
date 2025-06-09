@@ -4,25 +4,25 @@ Pada modul ini, praktikan diminta untuk membuat sebuah Operating System sederhan
 
 |_ include
 
-     |_ kernel.h
+   |_ kernel.h
      
-     |_ shell.h
+   |_ shell.h
      
-     |_ std_lib.h
+   |_ std_lib.h
      
-     |_ std_type.h
+   |_ std_type.h
      
 |_ src
 
-    |_ bootloader.asm
+   |_ bootloader.asm
     
-     |_ kernel.asm
+   |_ kernel.asm
      
-     |_ kernel.c
+   |_ kernel.c
      
-     |_ shell.c
+   |_ shell.c
      
-     |_ std_lib.c
+   |_ std_lib.c
      
 |_ bochsrc.txt
 
