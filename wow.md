@@ -2,7 +2,7 @@
 
 Pada modul ini, praktikan diminta untuk membuat sebuah Operating System sederhana yang bernama EorzeOS. Untuk struktur filenya seperti ini
 
-|_ include
+|_ include\n
    |_ kernel.h
    |_ shell.h
    |_ std_lib.h
