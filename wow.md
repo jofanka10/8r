@@ -22,6 +22,26 @@ Pada modul ini, praktikan diminta untuk membuat sebuah Operating System sederhan
 Dimana, setiap file memiliki peran yang sangat penting dalam operating system ini.
 
 ## `kernel.h`
+File ini berfungsi sebagai antarmuka untuk fungsionalitas inti kernel, mendeklarasikan fungsi-fungsi yang berhubungan langsung dengan interaksi hardware dan operasi I/O dasar seperti menampilkan string, membaca input, dan mengelola layar. Untuk kodenya seperti ini.
+
+```
+#ifndef __KERNEL_H__
+#define __KERNEL_H__
+
+#include "std_type.h"
+
+extern void putInMemory(int segment, int address, char character);
+extern int interrupt(int number, int AX, int BX, int CX, int DX);
+unsigned int getBiosTick();
+
+
+void printString(char* str);
+void readString(char* buf);
+void clearScreen(int color);
+
+
+#endif // __KERNEL_H__
+```
 
 ## `shell.h`
 File ini digunakan untuk mendeklarasikan semua fungsi yang membentuk shell antarmuka pengguna, termasuk fungsi utama shell, penguraian perintah, eksekusi perintah, serta fungsi terkait prompt dan respons. Untuk kodenya seperti ini.
@@ -720,3 +740,18 @@ clean:
 ```
 
 Dimana untuk meng-compilenya cukup dengan command `make`, jika ingin dijalankan di bochs maka dapat menggunakan `make run`. Jika ingin membersihkan file setelah digunakan, diperlukan `make clean`.
+
+## Revisi
+Revisi pada file dilakukan pada isi `bochsrc.txt`. Untuk kode sebelum seperti ini
+
+```
+floppya: 1_44="\\wsl.localhost\Ubuntu\home\hasro71\pr5\bin\floppy.img", status=inserted
+```
+
+menjadi seperti ini
+
+```
+floppya: 1_44="bin\floppy.img", status=inserted
+```
+
+
