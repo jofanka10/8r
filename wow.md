@@ -23,6 +23,70 @@ Dimana, setiap file memiliki peran yang sangat penting dalam operating system in
 
 ## `kernel.h`
 
+## `shell.h`
+File ini digunakan untuk mendeklarasikan semua fungsi yang membentuk shell antarmuka pengguna, termasuk fungsi utama shell, penguraian perintah, eksekusi perintah, serta fungsi terkait prompt dan respons. Untuk kodenya seperti ini.
+
+```
+#ifndef __SHELL_H__
+#define __SHELL_H__
+
+#include "std_type.h"
+
+void shell();
+void parseCommand(char *buf, char *cmd, char arg[2][64]);
+void eksekusi(char *cmd, char *buf, char arg[2][64]);
+void prompt(char *word);
+void setTextColor(int color);
+void randomAnswer();
+
+#endif // __SHELL_H__
+```
+
+Dimana deklarasi fungsi ditulis di file ini.
+
+## `std_lib.h`
+File header ini berfungsi untuk menyediakan deklarasi untuk berbagai fungsi utility standar, mencakup operasi aritmatika, manipulasi string, serta fungsi konversi antara string dan integer, yang dapat digunakan oleh bagian lain dari sistem. Untuk kodenya seperti ini.
+
+```
+#ifndef __STD_LIB_H__
+#define __STD_LIB_H__
+
+#include "std_type.h"
+
+// Fungsi Aritmatika
+int div(int a, int b);
+int mod(int a, int b);
+
+// Fungsi String
+bool strcmp(char *str1, char *str2);
+void strcpy(char *dst, char *src);
+void clear(byte *buf, unsigned int size);
+
+// Fungsi Konversi
+void atoi(char *str, int *num);
+void itoa(int num, char *str);
+
+#endif // __STD_LIB_H__
+
+```
+
+## `std_type.h`
+
+File ini bertujuan untuk mendefinisikan tipe data dasar (byte, bool) dan konstanta boolean (true, false) yang akan digunakan secara konsisten di seluruh proyek sistem operasi. Untuk kodenya seperti ini.
+
+```
+#ifndef __STD_TYPE_H__
+#define __STD_TYPE_H__
+
+typedef unsigned char byte;
+
+typedef char bool;
+#define true 1
+#define false 0
+
+#endif // __STD_TYPE_H__
+
+```
 
 ## `bootloader.asm`
 Bootloader ini digunakan untuk menjalankan fungsi assembly ke dalam OS. Assembly menggunakan 16-bit, sehingga program tidak dapat menggaunakan / dan % untuk perhitungannya. Untuk kodenya seperti ini
