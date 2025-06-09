@@ -409,3 +409,250 @@ Dimana cara kerjanya seperti ini
 - Perintah meliputi operasi seperti mengubah nama pengguna, mengganti tema layar, dan melakukan perhitungan matematika.
 - Shell beroperasi dalam loop tak terbatas, terus-menerus membaca, mengurai, dan mengeksekusi perintah.
 
+## std_lib.c
+File ini berfungsi untuk menyediakan implementasi fungsi utilitas dasar seperti manipulasi string (strlen, strcpy, strcmp), operasi memori (memset, memcpy), dan fungsi konversi data (atoi), yang diperlukan karena kernel tidak dapat menggunakan pustaka standar C. Untuk kodenya seperti ini
+
+```
+// =======================================================
+// DEKLARASI YANG DIBUTUHKAN (PENGGANTI .h)
+// =======================================================
+// Dari std_type.h
+typedef unsigned char byte;
+typedef char bool;
+#define true 1
+#define false 0
+
+// Deklarasi dari file ini sendiri
+int div(int a, int b);
+int mod(int a, int b);
+bool strcmp(char *str1, char *str2);
+void strcpy(char *dst, char *src);
+void clear(byte *buf, unsigned int size);
+void atoi(char *str, int *num);
+void itoa(int num, char *str);
+
+// =======================================================
+// KODE UTAMA
+// =======================================================
+
+int div(int a, int b) {
+    int sign = 1;
+    int quotient = 0;
+    if (b == 0) return 0; // Hindari division by zero
+    
+    if (a < 0) { sign *= -1; a = -a; }
+    if (b < 0) { sign *= -1; b = -b; }
+
+    while (a >= b) {
+        a -= b;
+        quotient++;
+    }
+    return sign * quotient;
+}
+
+// FUNGSI INI YANG DIPERBAIKI DAN DISERDEHANAKAN
+int mod(int a, int b) {
+    int result; // Deklarasi variabel di atas
+
+    if (b == 0) {
+        return 0; // Hindari division by zero
+    }
+    
+    // Menggunakan definisi matematika: a % b = a - (a / b) * b
+    result = a - (div(a, b) * b);
+    return result;
+}
+
+bool strcmp(char *str1, char *str2) {
+    while (*str1 != '\0' && *str2 != '\0') {
+        if (*str1 != *str2) return false;
+        str1++;
+        str2++;
+    }
+    return *str1 == *str2;
+}
+
+void strcpy(char *dst, char *src) {
+    while (*src) {
+        *dst++ = *src++;
+    }
+    *dst = '\0';
+}
+
+void clear(byte *buf, unsigned int size) {
+    unsigned int i;
+    for ( i = 0; i < size; i++) {
+        buf[i] = 0;
+    }
+}
+
+void atoi(char *str, int *num) {
+    int res = 0;
+    int sign = 1;
+    int i = 0;
+    while (str[i] == ' ') i++;
+    if (str[i] == '-') {
+        sign = -1;
+        i++;
+    } else if (str[i] == '+') {
+        i++;
+    }
+    while (str[i] >= '0' && str[i] <= '9') {
+        res = res * 10 + (str[i] - '0');
+        i++;
+    }
+    *num = sign * res;
+}
+
+void itoa(int num, char *str) {
+    int i = 0, j;
+    int is_negative = 0;
+
+    if (num == 0) {
+        str[i++] = '0';
+        str[i] = '\0';
+        return;
+    }
+
+    if (num < 0) {
+        is_negative = 1;
+        num = -num;
+    }
+
+    while (num != 0) {
+        str[i++] = mod(num, 10) + '0';
+        num = div(num, 10);
+    }
+
+    if (is_negative) {
+        str[i++] = '-';
+    }
+    str[i] = '\0';
+
+    // Balikkan string
+    for (j = 0; j < i / 2; j++) {
+        char temp = str[j];
+        str[j] = str[i - j - 1];
+        str[i - j - 1] = temp;
+    }
+}
+
+```
+
+Dimana cara kerjanya sebagai berikut.
+- Pada fungsi div(), fungsi pembagian tidak dapat dilakukan dengan memakai simbol `/`, karena assembly tidak mendukungnya. Sebagai gantinya, fungsi tersebut menggunakan pengurangan berulang untuk mendapatkan hasil pembagian.
+- Hal ini berlaku juga pada fungsi mod(), sehingga harus menggunakan metode manual untuk mendapatkan nilai hasil modulus.
+- Pada itoa dan atoi, kedua kodenya dapat ditulis sebagaimana dalam bahasa c biasa dengan menggunakan array.
+- Beberapa fungsi lainnya seperti strcmp, strcpy dan clear dideklarasikan di sini.
+
+## bochsrc.txt
+File ini digunakan untuk eksekusi sistem operasi sederhana. FIle ini dijalankan setelah seluruh kode telah dicompile dengan `make`. Untuk kodenya seperti ini
+```
+#=======================================================================
+# Konfigurasi CPU dan Memori
+#=======================================================================
+romimage: file=$BXSHARE/BIOS-bochs-latest
+vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+cpu: count=1, ips=10000000
+megs: 32
+
+#=======================================================================
+# Konfigurasi Floppy Disk
+# Pastikan path ini benar menunjuk ke lokasi file floppy.img Anda.
+#=======================================================================
+floppya: 1_44="\\wsl.localhost\Ubuntu\home\hasro71\pr5\bin\floppy.img", status=inserted
+boot: floppy
+
+#=======================================================================
+# Konfigurasi Tampilan (INI YANG DIPERBAIKI)
+# Menggunakan 'win32' sebagai fallback yang pasti ada di Windows.
+#=======================================================================
+display_library: win32
+vga: extension=vbe
+
+#=======================================================================
+# Konfigurasi Suara
+# Tetap menggunakan 'dummy' untuk menghindari crash.
+#=======================================================================
+sound: driver=dummy
+
+#=======================================================================
+# Opsi Lainnya
+#=======================================================================
+mouse: enabled=0
+pci: enabled=1, chipset=i440fx
+log: -
+panic: action=ask
+error: action=report
+info: action=report
+debug: action=ignore
+```
+
+## `makefile`
+Makefile bertujuan agar proses compile dapat berjalan hanya dengan sekali command. Cara kerja dari file ini adalah dengan menjalankan beberapa proses sekaligus setiap line yang ada di dalamnya. Untuk kodenya seperti ini.
+
+```
+# Compiler dan Tool
+CC = bcc
+AS = nasm
+LD = ld86
+
+# Flags
+CFLAGS = -ansi -c
+
+# Definisi file object
+C_OBJECTS = obj/kernel.o obj/shell.o obj/std_lib.o
+ASM_OBJECTS = obj/kernel-asm.o
+
+# Target Default: build semua
+all: build
+
+# Target utama: membangun floppy image
+build: bin/floppy.img
+
+# Aturan untuk membuat floppy image
+bin/floppy.img: bin/bootloader.bin bin/kernel.bin
+	@echo "Creating floppy image..."
+	dd if=/dev/zero of=$@ bs=512 count=2880
+	dd if=bin/bootloader.bin of=$@ bs=512 count=1 conv=notrunc
+	dd if=bin/kernel.bin of=$@ bs=512 seek=1 conv=notrunc
+
+# Aturan untuk membuat kernel.bin
+bin/kernel.bin: $(C_OBJECTS) $(ASM_OBJECTS)
+	@echo "Linking kernel..."
+	mkdir -p bin
+	$(LD) -o $@ -d $(ASM_OBJECTS) $(C_OBJECTS)
+
+# --- ATURAN KOMPILASI EKSPLISIT ---
+# Kita tidak menggunakan -Iinclude karena semua deklarasi sudah ada di dalam file .c
+
+# Aturan umum untuk mengompilasi file C
+obj/%.o: src/%.c
+	@echo "Compiling $<..."
+	mkdir -p obj
+	$(CC) $(CFLAGS) -o $@ $<
+
+# Aturan untuk mengompilasi file Assembly kernel
+obj/kernel-asm.o: src/kernel.asm
+	@echo "Assembling kernel.asm..."
+	mkdir -p obj
+	$(AS) -f as86 $< -o $@
+
+# Aturan untuk mengompilasi bootloader
+bin/bootloader.bin: src/bootloader.asm
+	@echo "Assembling bootloader..."
+	mkdir -p bin
+	$(AS) -f bin $< -o $@
+
+# Target untuk menjalankan Bochs
+run: build
+	bochs -f bochsrc.txt
+
+# Target untuk membersihkan file
+clean:
+	@echo "Cleaning up..."
+	rm -rf obj bin
+
+```
+
+Dimana untuk meng-compilenya cukup dengan command `make`, jika ingin dijalankan di bochs maka dapat menggunakan `make run`. Jika ingin membersihkan file setelah digunakan, diperlukan `make clean`.
