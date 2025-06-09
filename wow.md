@@ -1,7 +1,7 @@
 # Laporran Resume Modul 5 Sistem Operasi
 
 Pada modul ini, praktikan diminta untuk membuat sebuah Operating System sederhana yang bernama EorzeOS. Untuk struktur filenya seperti ini
-
+```
 |_ include\n
    |_ kernel.h
    |_ shell.h
@@ -9,21 +9,14 @@ Pada modul ini, praktikan diminta untuk membuat sebuah Operating System sederhan
    |_ std_type.h
      
 |_ src
-
    |_ bootloader.asm
-    
    |_ kernel.asm
-     
    |_ kernel.c
-     
    |_ shell.c
-     
    |_ std_lib.c
-     
 |_ bochsrc.txt
-
 |_ makefile
-
+```
 
 
 Dimana, setiap file memiliki peran yang sangat penting dalam operating system ini.
