@@ -1,7 +1,9 @@
 ## soal_3
 Pada soal ini, praktikan diminta untuk membuat tiga file, yaitu `dungeon.c` sebagai server, `shop.c`, dan `player.c` sebagai client.
 
-https://github.com/user-attachments/assets/0a3063c7-8e4e-423a-980d-b13bad67e079
+https://github.com/user-attachments/assets/4ca86ce6-1f18-4974-a16f-176505909320
+
+Jika ingin langsung ke jalankan, geser ke menit 01:37
 
 ### a. dungeon.c
 **1) Library**
