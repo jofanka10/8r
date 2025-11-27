@@ -639,3 +639,6 @@ ip addr add 10.78.1.3/25 dev eth0
 ip route add default via 10.78.1.1 dev eth0
 echo "nameserver 192.168.122.1" > /etc/resolv.conf
 ```
+
+
+## Misi 2 No. 1 - Misi 1 No. 4
