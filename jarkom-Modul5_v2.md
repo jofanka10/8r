@@ -603,3 +603,39 @@ ip route add 10.78.1.216/30 via 10.78.1.225
 
 echo "nameserver 192.168.122.1" > /etc/resolv.conf
 ```
+
+Cirdan
+/etc/network/interfaces
+```
+auto eth0
+iface eth inet static
+        address 10.78.1.2
+        netmask 255.255.255.128
+        gateway 10.78.1.1
+#       up echo nameserver 192.168.0.1 > /etc/resolv.conf
+```
+
+/root/.bashrc
+```
+ip addr add 10.78.1.2/25 dev eth0
+ip route add default via 10.78.1.1 dev eth0
+echo "nameserver 192.168.122.1" > /etc/resolv.conf
+```
+
+Gilgalad
+/etc/network/interfaces
+```
+auto eth0
+iface eth inet static
+        address 10.78.1.3
+        netmask 255.255.255.128
+        gateway 10.78.1.1
+#       up echo nameserver 192.168.0.1 > /etc/resolv.conf
+```
+
+/root/.bashrc
+```
+ip addr add 10.78.1.3/25 dev eth0
+ip route add default via 10.78.1.1 dev eth0
+echo "nameserver 192.168.122.1" > /etc/resolv.conf
+```
