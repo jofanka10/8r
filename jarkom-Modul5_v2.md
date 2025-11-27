@@ -281,7 +281,7 @@ iface eth2 inet static
 # IP Settings
 ip addr add 10.78.1.214/30 dev eth0
 ip addr add 10.78.1.129/26 dev eth1
-ipo addr add 10.78.1.193/29 dev eth2
+ip addr add 10.78.1.193/29 dev eth2
 ip route add default via 10.78.1.213 dev eth0
 
 # ke Moria
