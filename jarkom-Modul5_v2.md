@@ -199,7 +199,7 @@ iface eth2 inet static
 # IP Settings
 ip addr add 10.78.1.230/30 dev eth0
 ip addr add 10.78.1.209/30 dev eth1
-ip addr add 10.78.1.213/40 dev eth2
+ip addr add 10.78.1.213/30 dev eth2
 ip route add default via 10.78.1.229 dev eth0
 
 # ke Osgiliath
@@ -570,36 +570,36 @@ ip addr add 10.78.1.1/25 dev eth1
 ip route add default via 10.78.1.221 dev eth0
 
 # 0 ke Osgiliath
-ip route add 10.78.1.236/30 via 10.78.1.225
+ip route add 10.78.1.236/30 via 10.78.1.221
 
 # 1 ke Rivendell, Narya Vilya
-ip route add 10.78.1.232/30 via 10.78.1.225
-ip route add 10.78.1.200/29 via 10.78.1.225
+ip route add 10.78.1.232/30 via 10.78.1.221
+ip route add 10.78.1.200/29 via 10.78.1.221
 
 # 2 ke Moria
-ip route add 10.78.1.228/30 via 10.78.1.225
+ip route add 10.78.1.228/30 via 10.78.1.221
 
 # ke IronHills
-ip route add 10.78.1.208/30 via 10.78.1.225
+ip route add 10.78.1.208/30 via 10.78.1.221
 
 # ke Wilderland
-ip route add 10.78.1.212/30 via 10.78.1.225
+ip route add 10.78.1.212/30 via 10.78.1.221
 
 # ke Durin
-ip route add 10.78.1.128/26 via 10.78.1.225
+ip route add 10.78.1.128/26 via 10.78.1.221
 
 # ke Khamul
-ip route add 10.78.1.192/29 via 10.78.1.225
+ip route add 10.78.1.192/29 via 10.78.1.221
 
 # 3 Minastir
-ip route add 10.78.1.224/30 via 10.78.1.225
+ip route add 10.78.1.224/30 via 10.78.1.221
 
 # ke Elendil Isildur
-ip route add 10.78.0.0/24 via 10.78.1.225
+ip route add 10.78.0.0/24 via 10.78.1.221
 
 # ke Pelargir, Palantir
-ip route add 10.78.1.224/30 via 10.78.1.225
-ip route add 10.78.1.216/30 via 10.78.1.225
+ip route add 10.78.1.224/30 via 10.78.1.221
+ip route add 10.78.1.216/30 via 10.78.1.221
 
 echo "nameserver 192.168.122.1" > /etc/resolv.conf
 ```
