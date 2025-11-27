@@ -247,7 +247,7 @@ iface eth0 inet static
 /root/.bashrc
 ```
 ip addr add 10.78.1.210/30 dev eth0
-ip route add default via 10.78.1.200 dev eth0
+ip route add default via 10.78.1.209 dev eth0
 echo "nameserver 192.168.122.1" > /etc/resolv.conf 
 ```
 
