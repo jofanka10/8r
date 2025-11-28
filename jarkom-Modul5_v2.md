@@ -706,19 +706,30 @@ Setelah itu, restart service
 service isc-dhcp-server restart
 ```
 
-### DHCP Relay - Rivendell, AnduinBanks, Minastir
+### DHCP Relay - Rivendell, AnduinBanks, Minastir, Wilderland
 Install package yang diperlukan.
 ```
 apt-get update
 apt-get install isc-dhcp-relay -y
 ```
 Lalu, kita akan melakukan konfiguarasi DHCP relay
+
+#### Rivendell, AnduinBanks, Minastir
 `nano /etc/default/isc-dhcp-relay`
 ```
 SERVERS="10.78.1.203"
 INTERFACES="eth0 eth1"
 OPTIONS=""
 ```
+
+#### Wilderland
+`nano /etc/default/isc-dhcp-relay`
+```
+SERVERS="10.78.1.203"
+INTERFACES="eth0 eth1 eth2"
+OPTIONS=""
+```
+#### 
 Dimana `10.78.1.203` adalah IP Vilya (DHCP Server).
 Selanjutnya, lakuakn IP forwarding dan restart service.
 ```
