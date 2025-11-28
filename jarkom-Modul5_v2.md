@@ -1031,3 +1031,30 @@ chmod +x curl_test.sh
 Jika berhasil maka akan muncul seperti ini.
 
 <img width="398" height="313" alt="image" src="https://github.com/user-attachments/assets/db9fe9bf-cb5a-466e-a0ef-764179ffe929" />
+
+
+
+## Misi 2 No. 8
+Agar pesannya dapat dibelokkan ke IronHills, maka kita perlu mengkonfigurasi Moria. Untuk konfigurasinya seperti ini.
+
+```
+iptables -t nat -A PREROUTING -s 10.78.1.203 -d 10.78.1.196 -p tcp --dport 5555 -j DNAT --to-destination 10.78.1.210:5555
+```
+
+Setelah itu, jalankan kode ini pada Vilya, IronHills, dan Khamul.
+```
+nc -l -p 5555
+```
+
+Lalu, Kita dapat mencoba mengirim pesan dari VIlya dengan mengetikkan `Hai Khamul`. Jika berhasil maka akan muncul seperti ini.
+
+### Vilya
+<img width="348" height="56" alt="image" src="https://github.com/user-attachments/assets/51783bc0-130c-42e9-9133-fa850a5a97c5" />
+
+### IronHills
+<img width="376" height="65" alt="image" src="https://github.com/user-attachments/assets/9a336e4c-ebcf-44d0-b615-2104f591ac60" />
+
+### Khamul
+<img width="316" height="47" alt="image" src="https://github.com/user-attachments/assets/8c193c64-a9c2-47e4-a44c-de9103edab89" />
+
+Di mana pesannya muncul di IronHills, bukan Khamul. Ini menandakan bahwa konfigurasi berhasil.
