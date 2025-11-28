@@ -729,7 +729,7 @@ SERVERS="10.78.1.203"
 INTERFACES="eth0 eth1 eth2"
 OPTIONS=""
 ```
-#### 
+
 Dimana `10.78.1.203` adalah IP Vilya (DHCP Server).
 Selanjutnya, lakuakn IP forwarding dan restart service.
 ```
@@ -874,4 +874,32 @@ apt-get install isc-dhcp-client -y
 rm /etc/resolv.conf
 dhclient -v eth0
 ```
+## Misi 2 No. 2
+Untuk melakukannya, kita hanya perlu satu iptables untuk konfigurasi ini.
 
+### Vilya
+```
+iptables -A INPUT -p icmp --icmp-type echo-request -j DROP
+```
+
+## Misi 2 No. 3
+Sebelum melakukan ipotables, kita download netcat terlebih dahulu, di Vilya dan client lain.
+```
+apt-get update
+apt-get install netcat-openbsd
+```
+
+Jika sudah, maka dapat melakukan iptables pada Narya.
+```
+iptables -A INPUT -p udp --dport 53 -s 10.78.1.203 -j ACCEPT
+iptables -A INPUT -p udp --dport 53 -j DROP
+```
+Lalu, kita dapat mengujinya dengan 
+```
+nc -z -v -u 10.78.1.202 53
+```
+
+Pada Vilya maupun client lainnya. Jika sudah berhasil maka akan muncul seperti ini.
+
+**Vilya**
+<img width="614" height="37" alt="image" src="https://github.com/user-attachments/assets/b843dadf-6b37-4cdd-936c-63faf06b239b" />
