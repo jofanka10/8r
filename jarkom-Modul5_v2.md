@@ -892,7 +892,7 @@ apt-get install netcat-openbsd
 Jika sudah, maka dapat melakukan iptables pada Narya.
 ```
 iptables -A INPUT -p udp --dport 53 -s 10.78.1.203 -j ACCEPT
-iptables -A INPUT -p udp --dport 53 -j DROP
+iptables -A INPUT -p udp --dport 53 -j REJECT
 ```
 Lalu, kita dapat mengujinya dengan 
 ```
@@ -901,5 +901,12 @@ nc -z -v -u 10.78.1.202 53
 
 Pada Vilya maupun client lainnya. Jika sudah berhasil maka akan muncul seperti ini.
 
-**Vilya**
+### Vilya
+
 <img width="614" height="37" alt="image" src="https://github.com/user-attachments/assets/b843dadf-6b37-4cdd-936c-63faf06b239b" />
+
+### Khamul
+
+<img width="615" height="42" alt="image" src="https://github.com/user-attachments/assets/2296dd07-f1e4-4339-8a42-2e7e1ec97599" />
+
+Dimana hanya node Vilya yang dapat terhubung ke Narya.
