@@ -642,3 +642,92 @@ echo "nameserver 192.168.122.1" > /etc/resolv.conf
 
 
 ## Misi 2 No. 1 - Misi 1 No. 4
+Pertama-tama, kita akan konfigurasi DHCP Server
+
+### DHCP Server - Vilya
+Download package yang dibutuhkan.
+
+```
+apt update
+apt-get install isc-dhcp-relay -y
+```
+
+Lalu, lakukan konfigurasi pada file berikut.
+`nano /etc/default/isc-dhcp-relay`
+```
+SERVERS="10.78.1.203"
+INTERFACES="eth0 eth1"
+OPTIONS=""
+```
+Lalu, aktifkan IP forwarding dengan kode ini
+```
+echo 1 > /proc/sys/net/ipv4/ip_forward
+```
+
+Setelah itu, restart service
+```
+service isc-dhcp-relay restart
+```
+
+### DHCP Relay - Rivendell, AnduinBanks, Minastir
+Install package yang diperlukan.
+```
+apt-get update
+apt-get install isc-dhcp-relay -y
+```
+Lalu, kita akan melakukan konfiguarasi DHCP relay
+`nano /etc/default/isc-dhcp-relay`
+```
+SERVERS="10.78.1.203"
+INTERFACES="eth0 eth1"
+OPTIONS=""
+```
+Dimana `10.78.1.203` adalah IP Vilya (DHCP Server).
+Selanjutnya, lakuakn IP forwarding dan restart service.
+```
+echo 1 > /proc/sys/net/ipv4/ip_forward
+service isc-dhcp-relay restart
+```
+### DHCP Client
+Sebelum menghapus IP static yang sudah diperlukan, install package terlebih dahulu.
+#### Pada Khamul, Cirdan, Isildur, Durin, Gilgalad, dan Elendil
+(Contoh pada Cirdan)
+```
+apt-get update
+apt-get install isc-dhcp-client -y
+```
+
+Jika sudah, check dengan `dhclient -V`. Jika berhasil, maka akan muncul seperti ini.
+
+<img width="758" height="498" alt="image" src="https://github.com/user-attachments/assets/551a7f91-1efb-47a4-9cca-006f061a93ae" />
+
+Selanjutnya, kita akan menghapus konfigurasi IP static pada client. Ubah menjadi seperti ini.
+`/etc/network/interfaces`
+```
+auto eth0
+#iface eth0 inet dhcp
+```
+`/root/.bashrc`
+
+```
+#ip addr add 10.78.1.2/25 dev eth0
+#ip route add default via 10.78.1.1 dev eth0
+#echo "nameserver 192.168.122.1" > /etc/resolv.conf
+```
+Setelah itu, restart node DHCP Client. Jika dicek menggunakan `ip a show eth0`, maka tidak ada IP pada interface tersebut.
+
+<img width="737" height="110" alt="image" src="https://github.com/user-attachments/assets/90b8bfc5-0752-42b8-a1a3-ee961277b882" />
+
+Lalu, kita bisa minta IP dengan perintah ini.
+```dhclient -v eth0```
+
+Jika berhasil, maka akan muncul seperti ini.
+
+<img width="682" height="241" alt="image" src="https://github.com/user-attachments/assets/8522ad8b-ff78-409b-9036-bb2a2b723bfd" />
+
+`ip a show eth0`
+
+<img width="920" height="125" alt="image" src="https://github.com/user-attachments/assets/2d6865af-a992-4f8a-9dd0-0e82ce394d77" />
+
+
+
