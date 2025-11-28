@@ -986,6 +986,58 @@ Jika berhasil, maka akan muncul seperti ini.
 
 Di mana pada pukul `12:51:33 UTC` Cirdan dapat terhubung dengan Palantir, sedangkan Elendil tidak dapat terhubung dengan Palantir. Ini menunjukkan bahwa konfigurasi sukses.
 
+## Soal 2 No. 6
+Kita akan mengkonfigurasi Palantir menggunakan iptables. Untuk kodenya seperti ini.
+
+```
+# Flush Iptables
+iptables -F
+
+# A. Jika IP ini sudah ditandai, blokir dan reset timer 20 detik.
+iptables -A INPUT -m recent --name PORT_SCANNER --update -j DROP
+
+# Jika koneksi SYN > 15 kali dalam 20 detik, maka akan dicatat.
+iptables -A INPUT -p tcp --syn -m recent --name SCAN_COUNT --rcheck --seconds 20 --hitcount 16 -j LOG --log-prefix "PRT_SCAN_DETECTED: " --log-level 4
+
+# Jika koneksi SYN > 15 kali dalam 20 detik, DROP.
+iptables -A INPUT -p tcp --syn -m recent --name SCAN_COUNT --rcheck --seconds 20 --hitcount 16 -m recent --name PORT_SCANNER --set -j DROP
+
+# Setiap koneksi baru dihitung.
+iptables -A INPUT -p tcp --syn -m recent --name SCAN_COUNT --set
+
+
+# Konfigurasi Berdasarkan Waktu
+
+# Shift Pagi untuk Subnet A6 (Gilgalad & Cirdan)
+iptables -A INPUT -p tcp --dport 80 -s 10.78.1.0/25 -m time --timestart 07:00 --timestop 15:00 -j ACCEPT
+
+# Shift Malam untuk Subnet A5 (Elendil & Isildur)
+iptables -A INPUT -p tcp --dport 80 -s 10.78.0.0/24 -m time --timestart 17:00 --timestop 23:00 -j ACCEPT
+
+# Blokir Sisanya
+iptables -A INPUT -p tcp --dport 80 -j DROP
+```
+
+Lalu, lakukan `nmap` pada Elendil. Untuk commandnya seperti ini. Kita dapat mengecek akses koneksinya menggunakan `ping`.
+```
+ping -c 3 10.78.1.218
+
+nmap -T5 -p 1-100 10.78.1.218
+
+ping -c 3 10.78.1.218
+```
+
+Jika berhasil, maka akan muncul seperti ini.
+
+### Palantir
+<img width="635" height="635" alt="image" src="https://github.com/user-attachments/assets/10fb74cd-f402-4251-9bdd-d04fbefce5f1" />
+
+
+### Elendil
+<img width="630" height="768" alt="image" src="https://github.com/user-attachments/assets/110810b6-cfa1-4351-814e-565143c63459" />
+
+
+
 
 ## Soal 2 No. 7
 Kita akan membatasi akses ke IronHills maksimal 3 koneksi dalam waktu yang bersaman. Kita akan melakukan konfigurasi pada IronHills. 
