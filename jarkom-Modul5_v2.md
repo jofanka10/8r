@@ -730,4 +730,83 @@ Jika berhasil, maka akan muncul seperti ini.
 <img width="920" height="125" alt="image" src="https://github.com/user-attachments/assets/2d6865af-a992-4f8a-9dd0-0e82ce394d77" />
 
 
+### DNS Server - Narya
+Install package yang diperlukan.
+```
+apt-get update
+apt-get install bind9
+```
+Lakukan konfigurasi file seperti ini.
+`/etc/bind/named.conf.options`
+```
+options {
+        directory "/var/cache/bind";
+        allow-query { any; };
+        auth-nxdomain no;    # conform to RFC1035
+        listen-on-v6 { any; };
+};
+```
 
+`/etc/bind/named.conf.local`
+```
+zone "middleearth.local" {
+    type master;
+    file "/etc/bind/db.middleearth";
+};
+```
+
+`/etc/bind/db.middleearth`
+```
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     middleearth.local. root.middleearth.local. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      middleearth.local.
+@       IN      A       10.78.1.202   ; IP Narya sendiri
+; Record Web Server
+ironhills    IN      A       10.78.1.210
+palantir     IN      A       10.78.1.218
+```
+
+Setelah itu, kita restart bind9.
+```
+service named restart
+```
+
+### Web Server - IronHills, Palantir
+Install `nginx`
+```
+apt-get update
+apt-get install nginx
+```
+
+Buat file `index.html` (IronHills)
+```
+echo "Welcome to IronHills" > /var/www/html/index.html
+```
+
+
+Buat file `index.html` (Palantir)
+```
+echo "Welcome to Palantir" > /var/www/html/index.html
+```
+
+Jalankan `nginx`
+```
+service nginx start
+```
+
+### Uji Coba di Client
+Jika Web Server berhasil diimplementasikan, maka akan muncul seperti ini.
+`curl ironhills.middleearth.local`
+<img width="621" height="71" alt="image" src="https://github.com/user-attachments/assets/370bc370-b9bb-4a48-8e1c-40fd79a21a00" />
+
+`curl palantir.middleearth.local`
+<img width="625" height="66" alt="image" src="https://github.com/user-attachments/assets/326992cb-56c1-4458-b751-995d5eccafbe" />
