@@ -896,9 +896,9 @@ Jika berhasil maka akan muncul seperti ini.
 
 <img width="648" height="140" alt="image" src="https://github.com/user-attachments/assets/987765c4-b207-4567-9a75-64e28c5e1b9c" />
 
-Di mana VIlya dapat melakukan ping ke client, namun tidak sebaliknya.
+Di mana Vilya dapat melakukan ping ke client, namun tidak sebaliknya.
 ## Misi 2 No. 3
-Sebelum melakukan ipotables, kita download netcat terlebih dahulu, di Vilya dan client lain.
+Sebelum melakukan `iptables`, kita download netcat terlebih dahulu, di Vilya dan client lain.
 ```
 apt-get update
 apt-get install netcat-openbsd
