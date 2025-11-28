@@ -985,3 +985,49 @@ Jika berhasil, maka akan muncul seperti ini.
 <img width="619" height="539" alt="image" src="https://github.com/user-attachments/assets/5740ae90-dcd1-451e-831a-a6b9848fd44b" />
 
 Di mana pada pukul `12:51:33 UTC` Cirdan dapat terhubung dengan Palantir, sedangkan Elendil tidak dapat terhubung dengan Palantir. Ini menunjukkan bahwa konfigurasi sukses.
+
+
+## Soal 2 No. 7
+Kita akan membatasi akses ke IronHills maksimal 3 koneksi dalam waktu yang bersaman. Kita akan melakukan konfigurasi pada IronHills. 
+```
+iptables -F
+
+# Limit akses hingga 3 koneksi dalam waktu yang bersamaan
+iptables -A INPUT -p tcp --dport 80 -m connlimit --connlimit-above 3 --connlimit-mask 32 -j REJECT --reject-with tcp-reset
+
+# Aturan Akses Waktu
+# Subnet Durin (A2)
+iptables -A INPUT -p tcp --dport 80 -s 10.78.1.128/26 -m time --weekdays Sat,Sun -j ACCEPT
+
+# Subnet Khamul (A3)
+iptables -A INPUT -p tcp --dport 80 -s 10.78.1.192/29 -m time --weekdays Sat,Sun -j ACCEPT
+
+# Subnet Elendil & Isildur (A5)
+iptables -A INPUT -p tcp --dport 80 -s 10.78.0.0/24 -m time --weekdays Sat,Sun -j ACCEPT
+
+# Blokir Sisanya
+iptables -A INPUT -p tcp --dport 80 -j DROP
+```
+
+Lalu, kita coba test di Client yang bersangkutan. Kita dapa tmembuat file script dengan isi seperti ini.
+
+`curl_test.sh`
+
+```bash
+echo "--- TES BUKTI LIMIT 3 IP ---"
+# Kita jalankan 10 request SEKALIGUS (background)
+for i in {1..10}; do
+  curl -s -o /dev/null -w "Request $i: %{http_code}\n" --connect-timeout 2 http://10.78.1.210/ &
+done
+wait
+```
+
+Lalu jalankan dengan command ini.
+```
+chmod +x curl_test.sh
+./curl_test.sh
+```
+
+Jika berhasil maka akan muncul seperti ini.
+
+<img width="398" height="313" alt="image" src="https://github.com/user-attachments/assets/db9fe9bf-cb5a-466e-a0ef-764179ffe929" />
