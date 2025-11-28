@@ -858,3 +858,11 @@ Jika Web Server berhasil diimplementasikan, maka akan muncul seperti ini.
 
 `curl palantir.middleearth.local`
 <img width="625" height="66" alt="image" src="https://github.com/user-attachments/assets/326992cb-56c1-4458-b751-995d5eccafbe" />
+
+### Error Handling
+Jika saat DHCP Client menjalankan perintah `dhclient -v eth0`, lalu mumcul
+```
+bash: dhclient: command not found
+```
+Maka dapat melakukan `echo "nameserver 192.168.122.1" > /etc/resolv.conf` untuk sementara.
+
