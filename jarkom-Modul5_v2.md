@@ -1058,3 +1058,42 @@ Lalu, Kita dapat mencoba mengirim pesan dari VIlya dengan mengetikkan `Hai Khamu
 <img width="316" height="47" alt="image" src="https://github.com/user-attachments/assets/8c193c64-a9c2-47e4-a44c-de9103edab89" />
 
 Di mana pesannya muncul di IronHills, bukan Khamul. Ini menandakan bahwa konfigurasi berhasil.
+
+## Misi 3 No. 1
+Pada soal terakhir, kita akan mencoba konfigurasi pada Wilderland. Untuk konfigurasinya seperti ini.
+```
+iptables -F FORWARD
+iptables -I FORWARD -i eth2 -m mac --mac-source 02:42:79:29:0c:00 -j DROP
+```
+Di mana `02:42:79:29:0c:00` adalah mac milik Khamul (dapat dicek pada `ip a show eth0` pada Khamul). Mengapa menggunakan mac? Karena Khamul merupakan DHCP Client, apabila menggunakan IP maka kemungkinan dapat terjadi salah konfigurasi.
+
+Untuk pengujiannya dapat menggunakan command seperti ini.
+
+### `ping`
+```
+ping <IP Khamul/Client lain>
+```
+
+### `nc`
+```
+# Sender
+nc -v <IP Tujuan> 8888
+
+# Listener
+nc -l -p 8888 
+```
+Jika berhasil maka akan muncul seperti ini.
+
+### IronHills ke Khamul
+
+<img width="646" height="217" alt="image" src="https://github.com/user-attachments/assets/684b4234-b700-4f0c-bbc2-bfdb68bd5953" />
+
+<img width="615" height="48" alt="image" src="https://github.com/user-attachments/assets/88f251a5-a4b2-47e4-82bf-1118d3e17147" />
+
+### Khamul ke IronHills
+
+<img width="384" height="47" alt="image" src="https://github.com/user-attachments/assets/fd984f63-7360-4f4b-86a9-00a0991342cf" />
+
+<img width="632" height="217" alt="image" src="https://github.com/user-attachments/assets/87f77c6a-4ae7-42ff-9802-a913f0622c03" />
+
+
