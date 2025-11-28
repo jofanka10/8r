@@ -952,4 +952,36 @@ Menggunakan subnet diperlukan karena client menggunakan DHCP. Jika berhasil maka
 
 <img width="1061" height="149" alt="image" src="https://github.com/user-attachments/assets/4c476cbd-c798-4ef0-a43a-21e4f8639557" />
 
+## Misi 2 No. 5
+Untuk dapat melakukan shift di jam tertentu, kita akan mengkonfigurasi Palantir. 
+```
+# Shift Pagi di Subnet A6 (Gilgalad & Cirdan)
+iptables -A INPUT -p tcp --dport 80 -s 10.78.1.0/25 -m time --timestart 07:00 --timestop 15:00 -j ACCEPT
 
+# Shift Malam di Subnet A5 (Elendil & Isildur)
+iptables -A INPUT -p tcp --dport 80 -s 10.78.0.0/24 -m time --timestart 17:00 --timestop 23:00 -j ACCEPT
+
+# Blokir Sisanya
+iptables -A INPUT -p tcp --dport 80 -j DROP
+```
+Setelah itu, jalankan `nginx` di Palantir.
+
+```
+service nginx start
+```
+
+Cek di Client menggunakan command ini.
+
+```
+curl 10.78.1.218
+```
+
+Jika berhasil, maka akan muncul seperti ini.
+
+### Elendil
+<img width="631" height="121" alt="image" src="https://github.com/user-attachments/assets/643d48a8-710a-42d2-bf8d-7ed2e47bb30f" />
+
+### Cirdan
+<img width="619" height="539" alt="image" src="https://github.com/user-attachments/assets/5740ae90-dcd1-451e-831a-a6b9848fd44b" />
+
+Di mana pada pukul `12:51:33 UTC` Cirdan dapat terhubung dengan Palantir, sedangkan Elendil tidak dapat terhubung dengan Palantir. Ini menunjukkan bahwa konfigurasi sukses.
