@@ -649,24 +649,60 @@ Download package yang dibutuhkan.
 
 ```
 apt update
-apt-get install isc-dhcp-relay -y
+apt-get install isc-dhcp-server -y
 ```
 
 Lalu, lakukan konfigurasi pada file berikut.
-`nano /etc/default/isc-dhcp-relay`
+`nano /etc/default/isc-dhcp-server`
 ```
-SERVERS="10.78.1.203"
-INTERFACES="eth0 eth1"
-OPTIONS=""
+INTERFACESv4="eth0"
 ```
-Lalu, aktifkan IP forwarding dengan kode ini
+
+`/etc/dhcp/dhcpd.conf`
 ```
-echo 1 > /proc/sys/net/ipv4/ip_forward
+# Konfigurasi Global
+default-lease-time 600;
+max-lease-time 7200;
+
+# PENTING: Arahkan DNS ke IP Narya
+option domain-name-servers 10.78.1.202; 
+
+# Subnet Vilya (A4) - Harus ada deklarasi ini agar service jalan
+subnet 10.78.1.200 netmask 255.255.255.248 {
+}
+
+# Subnet A2 (Durin) - via Relay Wilderland
+subnet 10.78.1.128 netmask 255.255.255.192 {
+    range 10.78.1.131 10.78.1.190;
+    option routers 10.78.1.129;
+    option broadcast-address 10.78.1.191;
+}
+
+# Subnet A3 (Khamul) - via Relay Wilderland
+subnet 10.78.1.192 netmask 255.255.255.248 {
+    range 10.78.1.195 10.78.1.198;
+    option routers 10.78.1.193;
+    option broadcast-address 10.78.1.199;
+}
+
+# Subnet A5 (Elendil, Isildur) - via Relay Minastir
+subnet 10.78.0.0 netmask 255.255.255.0 {
+    range 10.78.0.10 10.78.0.254;
+    option routers 10.78.0.1;
+    option broadcast-address 10.78.0.255;
+}
+
+# Subnet A6 (Gilgalad, Cirdan) - via Relay AnduinBanks
+subnet 10.78.1.0 netmask 255.255.255.128 {
+    range 10.78.1.10 10.78.1.126;
+    option routers 10.78.1.1;
+    option broadcast-address 10.78.1.127;
+}
 ```
 
 Setelah itu, restart service
 ```
-service isc-dhcp-relay restart
+service isc-dhcp-server restart
 ```
 
 ### DHCP Relay - Rivendell, AnduinBanks, Minastir
