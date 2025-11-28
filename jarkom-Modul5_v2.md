@@ -68,6 +68,7 @@ ip route add 10.78.1.220/30 via 10.78.1.238 dev eth3
 ip route add 10.78.1.0/25 via 10.78.1.238 dev eth3
 
 echo "nameserver 192.168.122.1" > /etc/resolv.conf
+iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source 192.168.122.35
 ```
 
 Rivendell
