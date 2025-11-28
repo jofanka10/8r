@@ -924,8 +924,32 @@ Pada Vilya maupun client lainnya. Jika sudah berhasil maka akan muncul seperti i
 
 <img width="615" height="42" alt="image" src="https://github.com/user-attachments/assets/2296dd07-f1e4-4339-8a42-2e7e1ec97599" />
 
-Dimana hanya node Vilya yang dapat terhubung ke Narya.
+Di mana hanya node Vilya yang dapat terhubung ke Narya.
 
 ## Misi 2 No. 4
 
+Pada soal ini, kita akan melakukan `iptables` di IronHills. Untuk kofigurasinya seperti ini.
+
+```
+# 1. Izinkan Subnet Durin
+iptables -A INPUT -p tcp --dport 80 -s 10.78.1.128/26 -m time --weekdays Sat,Sun -j ACCEPT
+
+# 2. Izinkan Subnet Khamul
+iptables -A INPUT -p tcp --dport 80 -s 10.78.1.192/29 -m time --weekdays Sat,Sun -j ACCEPT
+
+# 3. Izinkan Subnet Elendil & Isildur
+iptables -A INPUT -p tcp --dport 80 -s 10.78.0.0/24 -m time --weekdays Sat,Sun -j ACCEPT
+
+# 4. Blokir sisanya
+iptables -A INPUT -p tcp --dport 80 -j DROP
+```
+Menggunakan subnet diperlukan karena client menggunakan DHCP. Jika berhasil maka akan muncul seperti ini.
+### hari Jum'at
+
 <img width="1062" height="147" alt="image" src="https://github.com/user-attachments/assets/a530d9b2-488d-4355-be50-4a178d8c9ef3" />
+
+### Hari Sabtu
+
+<img width="1061" height="149" alt="image" src="https://github.com/user-attachments/assets/4c476cbd-c798-4ef0-a43a-21e4f8639557" />
+
+
