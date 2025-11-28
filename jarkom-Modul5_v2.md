@@ -882,6 +882,21 @@ Untuk melakukannya, kita hanya perlu satu iptables untuk konfigurasi ini.
 iptables -A INPUT -p icmp --icmp-type echo-request -j DROP
 ```
 
+Jika berhasil maka akan muncul seperti ini.
+### IP Khamul (Dynamic)
+
+<img width="604" height="105" alt="image" src="https://github.com/user-attachments/assets/8d55c686-3088-4e40-81b8-1a7f5c717ff6" />
+
+
+### Vilya
+
+<img width="620" height="193" alt="image" src="https://github.com/user-attachments/assets/84b26356-56e1-4a7e-8074-8976ef952a5c" />
+
+### Khamul
+
+<img width="648" height="140" alt="image" src="https://github.com/user-attachments/assets/987765c4-b207-4567-9a75-64e28c5e1b9c" />
+
+Di mana VIlya dapat melakukan ping ke client, namun tidak sebaliknya.
 ## Misi 2 No. 3
 Sebelum melakukan ipotables, kita download netcat terlebih dahulu, di Vilya dan client lain.
 ```
