@@ -925,3 +925,7 @@ Pada Vilya maupun client lainnya. Jika sudah berhasil maka akan muncul seperti i
 <img width="615" height="42" alt="image" src="https://github.com/user-attachments/assets/2296dd07-f1e4-4339-8a42-2e7e1ec97599" />
 
 Dimana hanya node Vilya yang dapat terhubung ke Narya.
+
+## Misi 2 No. 4
+
+<img width="1062" height="147" alt="image" src="https://github.com/user-attachments/assets/a530d9b2-488d-4355-be50-4a178d8c9ef3" />
