@@ -705,7 +705,7 @@ Selanjutnya, kita akan menghapus konfigurasi IP static pada client. Ubah menjadi
 `/etc/network/interfaces`
 ```
 auto eth0
-#iface eth0 inet dhcp
+iface eth0 inet dhcp
 ```
 `/root/.bashrc`
 
