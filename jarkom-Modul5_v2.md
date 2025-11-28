@@ -864,5 +864,14 @@ Jika saat DHCP Client menjalankan perintah `dhclient -v eth0`, lalu mumcul
 ```
 bash: dhclient: command not found
 ```
-Maka dapat melakukan `echo "nameserver 192.168.122.1" > /etc/resolv.conf` untuk sementara.
+Maka dapat menjalankan perintah seperti ini.
+```
+echo "nameserver 192.168.122.1" > /etc/resolv.conf  # untuk sementara.
+
+apt-get update
+apt-get install isc-dhcp-client -y
+
+rm /etc/resolv.conf
+dhclient -v eth0
+```
 
