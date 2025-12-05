@@ -1,7 +1,7 @@
-
 <h1>Laporan Praktikum Ethical Hacking</h1>
-<p><strong>Nama Praktikan:</strong> [Nama Kamu]</p>
-<p><strong>Tanggal:</strong> [Tanggal Hari Ini]</p>
+<p><strong>Nama:</strong> Jofanka Al-Kautsar Pangestu Abady</p>
+<p><strong>NRP:</strong> 50237241107</p>
+<p><strong>Tanggal:</strong> Sabtu, 6 Desember 2025</p>
 
 
 <!-- ------------------------------- 1. Omongan Wong Semarang ------------------------------- -->
@@ -54,26 +54,47 @@ Score: 7.5 (High)
 <!-- ----------- 1d. Langkah Pengerjaan (Proof of Concept) ----------- -->
 <h3>Langkah Pengerjaan (Proof of Concept)</h3>
 
-
 <ol>
   <li>
     <p>
-      <strong>Analisis Request:</strong> Ditemukan parameter <code>?page=</code> yang berisi string acak. Setelah di-decode menggunakan Base64, string tersebut berisi nama file (misal <code>pages/home</code>).</p><blockquote><p><em>[MASUKKAN SCREENSHOT BURP SUITE SAAT ANALISIS PAGE PARAMETER]</em></p>
+      <strong>Tampilan Web:</strong> Secara tampilan tampak seperti kamus biasa, dan setiap definisi yang ada di dalamnya tidak terdapat input atau tombol tertentu.
+    </p>
+    <img width="1464" height="808" alt="Screenshot 2025-12-06 at 05 55 40" src="https://github.com/user-attachments/assets/35db5511-b630-465f-a1ce-1dc4cc1a8cb3" />
+
+<img width="1463" height="821" alt="Screenshot 2025-12-06 at 05 57 19" src="https://github.com/user-attachments/assets/e9412f80-0888-4ce0-9145-c629cd7701a9" />
       </blockquote>
   </li>
   
   <li>
     <p>
-      <strong>Percobaan Eksploitasi (Thought Process):</strong>
-Saya mencoba melakukan Path Traversal <code>../../../../etc/passwd</code>. Namun server memberikan error <code>failed to open stream: .../passwd.php</code>. Ini menunjukkan server memaksa ekstensi <code>.php</code>.
+      <strong>Analisis Request:</strong> Jika kita membukanya dengan Burp Suite, tidak adanya POST pada proses memuat laman ini.</p><blockquote><p><em>
+        <img width="932" height="419" alt="image" src="https://github.com/user-attachments/assets/e1468b4b-41ba-428c-a7fa-b029c91cf99e" />
+      </em>
+</p>
+      </blockquote>
+  </li>
+  
+  <li>
+    <p>
+      <strong>Percobaan Eksploitasi (Thought Process):</strong> Saya mencoba melakukan modifikasi pada hasil Burp Suite tadi, dengan mengubah <code>GET /?page=cGFnZXMvZ2VtcmFkYWs= HTTP/1.1</code> menjadi <code>Li4vLi4vLi4vLi4vZXRjL3Bhc3N3ZA==</code> di mana <code>Li4vLi4vLi4vLi4vZXRjL3Bhc3N3ZA==</code> adalah hasil decode dari <code>../../../../etc/passwd</code>.
     </p>
-    <blockquote>
-      <p>
-        <em>
-          [MASUKKAN SCREENSHOT ERROR MESSAGE YANG MENAMPILKAN .PHP]
-        </em>
-    </p>
-</blockquote>
+      <pre>
+HTTP/1.1 200 OK
+Date: Fri, 05 Dec 2025 23:08:48 GMT
+Server: Apache/2.4.65 (Debian)
+X-Powered-By: PHP/8.3.28
+Vary: Accept-Encoding
+Content-Length: 355
+Keep-Alive: timeout=5, max=100
+Connection: Keep-Alive
+Content-Type: text/html; charset=UTF-8
+
+<br />
+<b>Warning</b>:  include(../../../../etc/passwd.php): Failed to open stream: No such file or directory in <b>/var/www/html/index.php</b> on line <b>3</b><br />
+<br />
+<b>Warning</b>:  include(): Failed opening '../../../../etc/passwd.php' for inclusion (include_path='.:/usr/local/lib/php') in <b>/var/www/html/index.php</b> on line <b>3</b><br />
+
+    </pre>
   </li>
   
   <li>
