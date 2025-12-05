@@ -9,28 +9,50 @@
 
 
 <!-- ----------- 1a. Nama Kerentanan ----------- -->
-<h3>Nama Kerentanan</h3>
-<p><strong>Local File Inclusion (LFI)</strong> - Source Code Disclosure</p>
+<h3>
+  Nama Kerentanan
+</h3>
+
+<p>
+  <strong>Local File Inclusion (LFI)</strong> - Source Code Disclosure
+</p>
 
 <!-- ----------- 1b. Deskripsi Kerentanan ----------- -->
 <h3>Deskripsi Kerentanan</h3>
 
-<p>Aplikasi memiliki parameter <code>page</code> pada URL yang menerima input berupa string Base64. Input ini di-decode oleh server dan langsung digunakan dalam fungsi <code>include()</code> PHP dengan penambahan ekstensi <code>.<span class="selected">php</span></code> secara otomatis. Tidak adanya validasi input memungkinkan penyerang untuk memanipulasi jalur file (path traversal) dan membaca file sensitif di server atau membaca source code aplikasi menggunakan PHP Wrapper.</p>
+<p>
+  Aplikasi memiliki parameter <code>page</code> pada URL yang menerima input berupa string Base64. Input ini di-decode oleh server dan langsung digunakan dalam fungsi <code>include()</code> PHP dengan penambahan ekstensi <code>.<span class="selected">php</span></code> secara otomatis. Tidak adanya validasi input memungkinkan penyerang untuk memanipulasi jalur file (path traversal) dan membaca file sensitif di server atau membaca source code aplikasi menggunakan PHP Wrapper.
+</p>
 
 <!-- ----------- 1c. CVSS Score ----------- -->
-<h3>CVSS Score</h3>
+<h3>
+  CVSS Score
+</h3>
 
-<p><strong>Vector String:</strong> 
-  <code>AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N</code>
-<em>Penjelasan: Serangan via Network (N), Kompleksitas Rendah (L), Tanpa Privilege (N), Tanpa User Interaction (N), Scope Unchanged (U), Confidentiality High (H) karena bisa baca config/source code, Integrity &amp; Availability None.</em></p><p><strong>Hasil Kalkulasi Terminal:</strong>
+<p>
+  <strong>Vector String:</strong> <code>AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N</code>
+<em>Penjelasan: Serangan via Network (N), Kompleksitas Rendah (L), Tanpa Privilege (N), Tanpa User Interaction (N), Scope Unchanged (U), Confidentiality High (H) karena bisa baca config/source code, Integrity &amp; Availability None.</em>
+</p>
+<p>
+  <strong>
+    Hasil Kalkulasi Terminal:
+  </strong>
 
-</p><blockquote><p><em>[MASUKKAN SCREENSHOT TERMINAL HASIL RUNNING cvss_calc.py DISINI]</em>
+</p>
+<blockquote>
+  <p>
+    <em>
+      [MASUKKAN SCREENSHOT TERMINAL HASIL RUNNING cvss_calc.py DISINI]
+     </em>
   
-<strong>Score: 7.5 (High)</strong></p>
-
+<strong>
+Score: 7.5 (High)
+</strong>
+</p> 
+</blockquote>
 
 <!-- ----------- 1d. Langkah Pengerjaan (Proof of Concept) ----------- -->
-</blockquote><h3>Langkah Pengerjaan (Proof of Concept)</h3>
+<h3>Langkah Pengerjaan (Proof of Concept)</h3>
 
 
 <ol>
@@ -39,20 +61,45 @@
       <strong>Analisis Request:</strong> Ditemukan parameter <code>?page=</code> yang berisi string acak. Setelah di-decode menggunakan Base64, string tersebut berisi nama file (misal <code>pages/home</code>).</p><blockquote><p><em>[MASUKKAN SCREENSHOT BURP SUITE SAAT ANALISIS PAGE PARAMETER]</em></p>
       </blockquote>
   </li>
+  
   <li>
-    <p><strong>Percobaan Eksploitasi (Thought Process):</strong>
-Saya mencoba melakukan Path Traversal <code>../../../../etc/passwd</code>. Namun server memberikan error <code>failed to open stream: .../passwd.php</code>. Ini menunjukkan server memaksa ekstensi <code>.php</code>.</p><blockquote><p><em>[MASUKKAN SCREENSHOT ERROR MESSAGE YANG MENAMPILKAN .PHP]</em>
-    </p></blockquote>
+    <p>
+      <strong>Percobaan Eksploitasi (Thought Process):</strong>
+Saya mencoba melakukan Path Traversal <code>../../../../etc/passwd</code>. Namun server memberikan error <code>failed to open stream: .../passwd.php</code>. Ini menunjukkan server memaksa ekstensi <code>.php</code>.
+    </p>
+    <blockquote>
+      <p>
+        <em>
+          [MASUKKAN SCREENSHOT ERROR MESSAGE YANG MENAMPILKAN .PHP]
+        </em>
+    </p>
+</blockquote>
   </li>
   
   <li>
     <p>
-      <strong>Bypass Menggunakan PHP Wrapper:</strong>
-      Karena ekstensi <code>.php</code> dipaksa, saya menggunakan wrapper <code>php://filter</code> untuk membaca source code file <code>config.php</code> dalam bentuk Base64 agar tidak dieksekusi server.
+      <strong>Bypass Menggunakan PHP Wrapper:</strong> Karena ekstensi <code>.php</code> dipaksa, saya menggunakan wrapper <code>php://filter</code> untuk membaca source code file <code>config.php</code> dalam bentuk Base64 agar tidak dieksekusi server.
     </p>
-    <p><strong>Payload:</strong> <code>php://filter/convert.base64-encode/resource=config</code>
-<strong>Base64 Encoded Payload (untuk URL):</strong> <code>cGhwOi8vZmlsdGVyL2NvbnZlcnQuYmFzZTY0LWVuY29kZS9yZXNvdXJjZT1jb25maWc=</code></p><blockquote><p><em>[MASUKKAN SCREENSHOT REPEATER DENGAN PAYLOAD DI ATAS]</em></p></blockquote></li><li> 
-  <p><strong>Decoding Hasil:</strong>Respon dari server berupa string Base64 panjang. Setelah di-decode, ditemukan kredensial database dan Flag.</p>
+    <p>
+      <strong>Payload:</strong> <code>php://filter/convert.base64-encode/resource=config</code>
+      
+<strong>Base64 Encoded Payload (untuk URL):</strong> 
+
+<code>cGhwOi8vZmlsdGVyL2NvbnZlcnQuYmFzZTY0LWVuY29kZS9yZXNvdXJjZT1jb25maWc=</code>
+</p>
+<blockquote>
+  <p>
+    <em>
+      [MASUKKAN SCREENSHOT REPEATER DENGAN PAYLOAD DI ATAS]
+    </em>
+  </p>
+</blockquote>
+</li>
+
+<li> 
+  <p>
+    <strong>Decoding Hasil:</strong>Respon dari server berupa string Base64 panjang. Setelah di-decode, ditemukan kredensial database dan Flag.
+  </p>
 <blockquote>
   <p>
     <em>
