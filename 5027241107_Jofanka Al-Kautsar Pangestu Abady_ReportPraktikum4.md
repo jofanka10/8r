@@ -10,25 +10,79 @@
 
 <h3>Deskripsi Kerentanan</h3>
 
-<p>Aplikasi memiliki parameter <code>page</code> pada URL yang menerima input berupa string Base64. Input ini di-decode oleh server dan langsung digunakan dalam fungsi <code>include()</code> PHP dengan penambahan ekstensi <code>.<span class="selected">php</span></code> secara otomatis. Tidak adanya validasi input memungkinkan penyerang untuk memanipulasi jalur file (path traversal) dan membaca file sensitif di server atau membaca source code aplikasi menggunakan PHP Wrapper.</p><h3>CVSS Score</h3><p><strong>Vector String:</strong> <code>AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N</code>
-<em>Penjelasan: Serangan via Network (N), Kompleksitas Rendah (L), Tanpa Privilege (N), Tanpa User Interaction (N), Scope Unchanged (U), Confidentiality High (H) karena bisa baca config/source code, Integrity &amp; Availability None.</em></p><p><strong>Hasil Kalkulasi Terminal:</strong></p><blockquote><p><em>[MASUKKAN SCREENSHOT TERMINAL HASIL RUNNING cvss_calc.py DISINI]</em>
+<p>Aplikasi memiliki parameter <code>page</code> pada URL yang menerima input berupa string Base64. Input ini di-decode oleh server dan langsung digunakan dalam fungsi <code>include()</code> PHP dengan penambahan ekstensi <code>.<span class="selected">php</span></code> secara otomatis. Tidak adanya validasi input memungkinkan penyerang untuk memanipulasi jalur file (path traversal) dan membaca file sensitif di server atau membaca source code aplikasi menggunakan PHP Wrapper.</p>
+
+<h3>CVSS Score</h3>
+
+<p><strong>Vector String:</strong> 
+  <code>AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N</code>
+<em>Penjelasan: Serangan via Network (N), Kompleksitas Rendah (L), Tanpa Privilege (N), Tanpa User Interaction (N), Scope Unchanged (U), Confidentiality High (H) karena bisa baca config/source code, Integrity &amp; Availability None.</em></p><p><strong>Hasil Kalkulasi Terminal:</strong>
+
+</p><blockquote><p><em>[MASUKKAN SCREENSHOT TERMINAL HASIL RUNNING cvss_calc.py DISINI]</em>
+  
 <strong>Score: 7.5 (High)</strong></p>
 
 </blockquote><h3>Langkah Pengerjaan (Proof of Concept)</h3>
 
-<ol><li><p><strong>Analisis Request:</strong>
-Ditemukan parameter <code>?page=</code> yang berisi string acak. Setelah di-decode menggunakan Base64, string tersebut berisi nama file (misal <code>pages/home</code>).</p><blockquote><p><em>[MASUKKAN SCREENSHOT BURP SUITE SAAT ANALISIS PAGE PARAMETER]</em></p></blockquote></li><li><p><strong>Percobaan Eksploitasi (Thought Process):</strong>
-Saya mencoba melakukan Path Traversal <code>../../../../etc/passwd</code>. Namun server memberikan error <code>failed to open stream: .../passwd.php</code>. Ini menunjukkan server memaksa ekstensi <code>.php</code>.</p><blockquote><p><em>[MASUKKAN SCREENSHOT ERROR MESSAGE YANG MENAMPILKAN .PHP]</em></p></blockquote></li><li><p><strong>Bypass Menggunakan PHP Wrapper:</strong>
-Karena ekstensi <code>.php</code> dipaksa, saya menggunakan wrapper <code>php://filter</code> untuk membaca source code file <code>config.php</code> dalam bentuk Base64 agar tidak dieksekusi server.</p><p><strong>Payload:</strong> <code>php://filter/convert.base64-encode/resource=config</code>
-<strong>Base64 Encoded Payload (untuk URL):</strong> <code>cGhwOi8vZmlsdGVyL2NvbnZlcnQuYmFzZTY0LWVuY29kZS9yZXNvdXJjZT1jb25maWc=</code></p><blockquote><p><em>[MASUKKAN SCREENSHOT REPEATER DENGAN PAYLOAD DI ATAS]</em></p></blockquote></li><li><p><strong>Decoding Hasil:</strong>
-Respon dari server berupa string Base64 panjang. Setelah di-decode, ditemukan kredensial database dan Flag.</p><blockquote><p><em>[MASUKKAN SCREENSHOT HASIL DECODE CONFIG.PHP YANG ADA FLAGNYA]</em></p></blockquote></li></ol><h3>Dampak</h3><p>Penyerang dapat membaca source code aplikasi (Intellectual Property) dan file konfigurasi sensitif yang berisi kredensial database atau API Key, yang dapat mengarah pada pengambilalihan sistem secara penuh.</p><h3>Mitigasi</h3><ol><li><p>Gunakan <strong>Whitelist</strong> (daftar putih) untuk file yang boleh diakses. Hindari memasukkan input user langsung ke fungsi <code>include()</code>.</p></li><li><p>Matikan opsi <code>allow_url_include</code> dan <code>allow_url_fopen</code> di <code>php.ini</code>.</p></li><li><p>Validasi input user secara ketat (hanya alphanumeric).</p></li></ol><h2>2. URL Surfer</h2><h3>Nama Kerentanan</h3><p><strong>Server-Side Request Forgery (SSRF)</strong></p><h3>Deskripsi Kerentanan</h3><p>Aplikasi memiliki fitur untuk mengambil konten dari URL yang diberikan pengguna (<code>/fetch?url=...</code>). Logika filter domain hanya mengecek keberadaan string <code>google.com/url?q=</code> tanpa memvalidasi struktur URL secara keseluruhan. Penyerang dapat memanipulasi input untuk memaksa server mengakses layanan internal (localhost) yang seharusnya tidak dapat diakses dari luar.</p><h3>CVSS Score</h3><p><strong>Vector String:</strong> <code>AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N</code>
+
+<ol>
+  <li>
+    <p>
+      <strong>Analisis Request:</strong> Ditemukan parameter <code>?page=</code> yang berisi string acak. Setelah di-decode menggunakan Base64, string tersebut berisi nama file (misal <code>pages/home</code>).</p><blockquote><p><em>[MASUKKAN SCREENSHOT BURP SUITE SAAT ANALISIS PAGE PARAMETER]</em></p>
+      </blockquote>
+  </li>
+  <li>
+    <p><strong>Percobaan Eksploitasi (Thought Process):</strong>
+Saya mencoba melakukan Path Traversal <code>../../../../etc/passwd</code>. Namun server memberikan error <code>failed to open stream: .../passwd.php</code>. Ini menunjukkan server memaksa ekstensi <code>.php</code>.</p><blockquote><p><em>[MASUKKAN SCREENSHOT ERROR MESSAGE YANG MENAMPILKAN .PHP]</em>
+</p></blockquote></li>
+  
+  <li>
+    <p>
+      <strong>Bypass Menggunakan PHP Wrapper:</strong>
+      Karena ekstensi <code>.php</code> dipaksa, saya menggunakan wrapper <code>php://filter</code> untuk membaca source code file <code>config.php</code> dalam bentuk Base64 agar tidak dieksekusi server.</p><p><strong>Payload:</strong> <code>php://filter/convert.base64-encode/resource=config</code>
+<strong>Base64 Encoded Payload (untuk URL):</strong> <code>cGhwOi8vZmlsdGVyL2NvbnZlcnQuYmFzZTY0LWVuY29kZS9yZXNvdXJjZT1jb25maWc=</code></p><blockquote><p><em>[MASUKKAN SCREENSHOT REPEATER DENGAN PAYLOAD DI ATAS]</em></p></blockquote></li><li> 
+  <p><strong>Decoding Hasil:</strong>Respon dari server berupa string Base64 panjang. Setelah di-decode, ditemukan kredensial database dan Flag.</p>
+<blockquote>
+  <p>
+    <em>
+      [MASUKKAN SCREENSHOT HASIL DECODE CONFIG.PHP YANG ADA FLAGNYA]
+    </em>
+  </p>
+</blockquote>
+</li>
+</ol>
+
+<h3>Dampak</h3>
+
+<p>Penyerang dapat membaca source code aplikasi (Intellectual Property) dan file konfigurasi sensitif yang berisi kredensial database atau API Key, yang dapat mengarah pada pengambilalihan sistem secara penuh.</p>
+
+<h3>Mitigasi</h3>
+<ol>
+  <li>
+    <p>Gunakan <strong>Whitelist</strong> (daftar putih) untuk file yang boleh diakses. Hindari memasukkan input user langsung ke fungsi <code>include()</code>.</p>
+  </li>
+  <li>
+    <p>Matikan opsi <code>allow_url_include</code> dan <code>allow_url_fopen</code> di <code>php.ini</code>.</p>
+  </li>
+  <li>
+    <p>Validasi input user secara ketat (hanya alphanumeric).</p>
+  </li>
+</ol>
+
+
+<h2>2. URL Surfer</h2>
+
+<h3>Nama Kerentanan</h3><p><strong>Server-Side Request Forgery (SSRF)</strong></p><h3>Deskripsi Kerentanan</h3><p>Aplikasi memiliki fitur untuk mengambil konten dari URL yang diberikan pengguna (<code>/fetch?url=...</code>). Logika filter domain hanya mengecek keberadaan string <code>google.com/url?q=</code> tanpa memvalidasi struktur URL secara keseluruhan. Penyerang dapat memanipulasi input untuk memaksa server mengakses layanan internal (localhost) yang seharusnya tidak dapat diakses dari luar.</p><h3>CVSS Score</h3><p><strong>Vector String:</strong> <code>AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N</code>
 <em>Penjelasan: Scope Changed (C) karena serangan berpindah dari aplikasi web ke layanan internal (port 1337).</em></p><p><strong>Hasil Kalkulasi Terminal:</strong></p><blockquote><p><em>[MASUKKAN SCREENSHOT TERMINAL HASIL RUNNING cvss_calc.py DISINI]</em>
 <strong>Score: 8.6 (High)</strong></p></blockquote><h3>Langkah Pengerjaan (Proof of Concept)</h3><ol><li><p><strong>Analisis Source Code:</strong>
 Ditemukan celah pada logika Python: <code>url.split("google.com/url?q=")[1]</code>. Kode hanya mengambil bagian belakang string tanpa memvalidasi bagian depan.</p></li><li><p><strong>Crafting Payload:</strong>
 Saya menyusun URL dengan format: <code>[Bypass Filter] + [Splitter] + [Internal Target]</code>.
 Target internal adalah <code>http://127.0.0.1:1337/flag</code>.</p><p><strong>Payload:</strong> <code>http://google.com/url?q=http://127.0.0.1:1337/flag</code></p></li><li><p><strong>Eksploitasi:</strong>
 Mengirimkan request ke endpoint <code>/fetch</code> dengan payload tersebut.</p><blockquote><p><em>[MASUKKAN SCREENSHOT BROWSER/BURP SUITE SAAT REQUEST KE /FETCH]</em></p></blockquote></li><li><p><strong>Hasil:</strong>
-Server merespons dengan JSON yang berisi Flag dari layanan internal.</p><blockquote><p><em>[MASUKKAN SCREENSHOT RESPON BERISI FLAG]</em></p></blockquote></li></ol><h3>Dampak</h3><p>Penyerang dapat memindai port internal (Port Scanning), mengakses layanan internal yang tidak terproteksi (seperti database, admin panel, atau microservices), dan membaca data sensitif.</p><h3>Mitigasi</h3><ol><li><p>Validasi input URL menggunakan library parsing yang aman, pastikan hostname yang dituju benar-benar valid.</p></li><li><p>Implementasikan <strong>Blocklist</strong> untuk IP Private/Local (seperti 127.0.0.1, 10.x.x.x, 192.168.x.x).</p></li><li><p>Nonaktifkan fitur redirect pada library HTTP client (jika tidak diperlukan).</p></li></ol><h2>3. XML Idol Processor</h2><h3>Nama Kerentanan</h3><p><strong>XML External Entity (XXE) Injection</strong></p><h3>Deskripsi Kerentanan</h3><p>Aplikasi memproses input XML dari pengguna (melalui URL eksternal) dengan konfigurasi parser yang tidak aman (<code>LIBXML_NOENT</code> dan <code>substituteEntities = true</code>). Hal ini memungkinkan penyerang mendefinisikan <em>external entities</em> untuk membaca file lokal di server.</p><h3>CVSS Score</h3><p><strong>Vector String:</strong> <code>AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N</code>
+Server merespons dengan JSON yang berisi Flag dari layanan internal.</p><blockquote><p><em>[MASUKKAN SCREENSHOT RESPON BERISI FLAG]</em></p></blockquote></li></ol><h3>Dampak</h3><p>Penyerang dapat memindai port internal (Port Scanning), mengakses layanan internal yang tidak terproteksi (seperti database, admin panel, atau microservices), dan membaca data sensitif.</p><h3>Mitigasi</h3><ol><li><p>Validasi input URL menggunakan library parsing yang aman, pastikan hostname yang dituju benar-benar valid.</p></li><li><p>Implementasikan <strong>Blocklist</strong> untuk IP Private/Local (seperti 127.0.0.1, 10.x.x.x, 192.168.x.x).</p></li><li><p>Nonaktifkan fitur redirect pada library HTTP client (jika tidak diperlukan).</p></li></ol>
+
+
+<h2>3. XML Idol Processor</h2><h3>Nama Kerentanan</h3><p><strong>XML External Entity (XXE) Injection</strong></p><h3>Deskripsi Kerentanan</h3><p>Aplikasi memproses input XML dari pengguna (melalui URL eksternal) dengan konfigurasi parser yang tidak aman (<code>LIBXML_NOENT</code> dan <code>substituteEntities = true</code>). Hal ini memungkinkan penyerang mendefinisikan <em>external entities</em> untuk membaca file lokal di server.</p><h3>CVSS Score</h3><p><strong>Vector String:</strong> <code>AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N</code>
 <em>Penjelasan: Confidentiality High karena bisa membaca file sistem (/etc/passwd).</em></p><p><strong>Hasil Kalkulasi Terminal:</strong></p><blockquote><p><em>[MASUKKAN SCREENSHOT TERMINAL HASIL RUNNING cvss_calc.py DISINI]</em>
 <strong>Score: 7.5 (High)</strong></p></blockquote><h3>Langkah Pengerjaan (Proof of Concept)</h3><ol><li><p><strong>Identifikasi Celah:</strong>
 Halaman depan menyebutkan "supports DTD processing and external entity resolution". Ini adalah indikator utama XXE.</p></li><li><p><strong>Pembuatan Payload (GitHub Gist):</strong>
