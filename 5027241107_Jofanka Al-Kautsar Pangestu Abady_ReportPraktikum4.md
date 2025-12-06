@@ -3,7 +3,23 @@
 <p><strong>NRP:</strong> 5027241107</p>
 <p><strong>Tanggal:</strong> Sabtu, 6 Desember 2025</p>
 
+<h2>CVE</h2>
+<p>
+  Saya coba scan dengan <code>nmap -sV --script vuln -p 2509 10.15.42.23</code> pada semua port pada soal yang saya kerjakan, versi CVE yang digunakan sama, yaitu CVE-2007-6750.
 
+Hasil Pemindaian:
+
+<img width="1067" height="586" alt="Screenshot 2025-12-06 at 17 27 14" src="https://github.com/user-attachments/assets/c3c1b1d1-d53e-4774-b0ff-ba794ff73e16" />
+
+Server: Apache httpd 2.4.65 (Debian).
+
+Detected Vulnerability: Nmap mendeteksi CVE-2007-6750 (Slow HTTP Denial of Service / "Slowloris").
+
+Interpretasi: Kerentanan CVE-2007-6750 yang terdeteksi adalah kerentanan pada level Infrastruktur Web Server (Apache), bukan pada logika aplikasi. Kerentanan ini muncul secara seragam di berbagai port (2509, 5006, 1234) karena seluruh tantangan di-hosting pada service Apache yang sama.
+
+
+  
+</p>
 <!-- ------------------------------- 1. Omongan Wong Semarang ------------------------------- -->
 <h2>1. Omongan Wong Semarang</h2>
 
@@ -23,33 +39,6 @@
 <p>
   Aplikasi memiliki parameter <code>page</code> pada URL yang menerima input berupa string Base64. Input ini di-decode oleh server dan langsung digunakan dalam fungsi <code>include()</code> PHP dengan penambahan ekstensi <code>.<span class="selected">php</span></code> secara otomatis. Tidak adanya validasi input memungkinkan penyerang untuk memanipulasi jalur file (path traversal) dan membaca file sensitif di server atau membaca source code aplikasi menggunakan PHP Wrapper.
 </p>
-
-<!-- ----------- 1c. CVSS Score ----------- -->
-<h3>
-  CVSS Score
-</h3>
-
-<p>
-  <strong>Vector String:</strong> <code>AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N</code>
-<em>Penjelasan: Serangan via Network (N), Kompleksitas Rendah (L), Tanpa Privilege (N), Tanpa User Interaction (N), Scope Unchanged (U), Confidentiality High (H) karena bisa baca config/source code, Integrity &amp; Availability None.</em>
-</p>
-<p>
-  <strong>
-    Hasil Kalkulasi Terminal:
-  </strong>
-
-</p>
-<blockquote>
-  <p>
-    <em>
-      [MASUKKAN SCREENSHOT TERMINAL HASIL RUNNING cvss_calc.py DISINI]
-     </em>
-  
-<strong>
-Score: 7.5 (High)
-</strong>
-</p> 
-</blockquote>
 
 <!-- ----------- 1d. Langkah Pengerjaan (Proof of Concept) ----------- -->
 <h3>Langkah Pengerjaan (Proof of Concept)</h3>
@@ -170,13 +159,6 @@ PD9waHAKLy8gRGF0YWJhc2UgQ29uZmlndXJhdGlvbgokZGJfaG9zdCA9ICdsb2NhbGhvc3QnOwokZGJf
 <h3>Deskripsi Kerentanan</h3>
 <p>Aplikasi memiliki fitur untuk mengambil konten dari URL yang diberikan pengguna (<code>/fetch?url=...</code>). Logika filter domain hanya mengecek keberadaan string <code>google.com/url?q=</code> tanpa memvalidasi struktur URL secara keseluruhan. Penyerang dapat memanipulasi input untuk memaksa server mengakses layanan internal (localhost) yang seharusnya tidak dapat diakses dari luar.</p>
 
-<!-- ----------- 2c. CVSS Score ----------- -->
-<h3>CVSS Score</h3>
-<p><strong>Vector String:</strong> <code>AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N</code>
-<em>Penjelasan: Scope Changed (C) karena serangan berpindah dari aplikasi web ke layanan internal (port 1337).</em></p><p><strong>Hasil Kalkulasi Terminal:</strong></p><blockquote><p><em>[MASUKKAN SCREENSHOT TERMINAL HASIL RUNNING cvss_calc.py DISINI]</em>
-  
-<strong>Score: 8.6 (High)</strong></p>
-</blockquote>
 
 <!-- ----------- 2d. Langkah Pengerjaan (Proof of Concept) ----------- -->
 <h3>
@@ -277,26 +259,6 @@ Mengirimkan request <code>/fetch?url=http%3A%2F%2F10.15.42.23%3A5005%2F</code> d
   Aplikasi memproses input XML dari pengguna (melalui URL eksternal) dengan konfigurasi parser yang tidak aman (<code>LIBXML_NOENT</code> dan <code>substituteEntities = true</code>). Hal ini memungkinkan penyerang mendefinisikan <em>external entities</em> untuk membaca file lokal di server.
 </p>
 
-<!-- ----------- 3c. CVSS Score ----------- -->
-<h3>CVSS Score</h3>
-
-<p>
-  <strong>Vector String:</strong> <code>AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N</code>
-
-  <em>Penjelasan: Confidentiality High karena bisa membaca file sistem (/etc/passwd).</em></p><p><strong>Hasil Kalkulasi Terminal:</strong>
-</p>
-
-<blockquote>
-  <p>
-  <em>
-    [MASUKKAN SCREENSHOT TERMINAL HASIL RUNNING cvss_calc.py DISINI]
-  </em>
-<strong>
-  Score: 7.5 (High)
-</strong>
-</p>
-  
-</blockquote>
 
 <!-- ----------- 3d. Langkah Pengerjaan (Proof of Concept) ----------- -->
 <h3>Langkah Pengerjaan (Proof of Concept)</h3>
