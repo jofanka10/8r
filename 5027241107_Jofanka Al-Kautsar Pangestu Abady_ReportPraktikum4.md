@@ -473,11 +473,26 @@ GET /?pokemon=../../../../etc/passwd
 
   <img width="1524" height="749" alt="image" src="https://github.com/user-attachments/assets/6d915ec5-e09a-4226-9117-2a0709c616e8" />
 
+  <p>Di mana kita dapat menemukan kerentanan dengan adanya file index.php di sana, dan kita tidak bisa menggunaakn path speerti <code>../../</code>.</p>
 
   </li>
   <li>
-         <strong>Identfikasi Parameter yang Rentan</strong>: Kita akan mencoba paramater seperti pad akode di bawah ini. Caranya adalah dengan menambah ke repeater dari <code>GET /?pokemon=Rotom-Wash.html HTTP/1.1</code> (untuk mengapatkan Rotom-Wash cukup dengan mengklik Rotom-Wash pada website.  Selanjut
-  </li> 
+    <p><strong>Assert() Injection Testing:</strong> Karena kita dapat menukan sebuah file PHP, langkah selanutnya kita dapat mencari informasi terkait file .php melalui kode ini.</p>
+  
+
+  <pre>
+    /?pokemon='.phpinfo().'
+  </pre>
+
+  <p>Jika dijalankan, maka akan muncul seperti ini.</p>
+
+  <img width="1535" height="733" alt="image" src="https://github.com/user-attachments/assets/d5141405-5843-4f6a-8665-90523d1aac7e" />
+  </li>
+
+  <li>
+
+    
+  </li>
   </ol>
 
 <!-- ----------- 4e. Dampak ----------- -->
