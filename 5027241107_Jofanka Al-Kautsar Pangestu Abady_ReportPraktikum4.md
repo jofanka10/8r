@@ -397,16 +397,16 @@ Setelah memasukkan URL di atas, sebuah flag muncul.
 </ol>
 
 
-<!-- ------------------------------- 4. Eterion Storage ------------------------------- -->
+<!-- ------------------------------- 4. My Favorite Pokemon (User) ------------------------------- -->
 
-<h2>4. Eterion Storage</h2>
+<h2>4. My Favorite Pokemon (User)</h2>
 <!-- ----------- 4a. Nama Kerentanan ----------- -->
 <h3>
   Nama Kerentanan
 </h3>
 <p>
   <strong>
-    Arbitrary File Read via Archive Symlink (Zip Slip Variation)
+      Local File Inclusion (LFI) 
   </strong>
 </p>
 
@@ -415,31 +415,26 @@ Setelah memasukkan URL di atas, sebuah flag muncul.
   Deskripsi Kerentanan
 </h3>
 <p>
-  Fitur "Auto extract" pada aplikasi gagal memvalidasi isi file arsip (ZIP). Aplikasi mengekstrak <em>symbolic link</em> (tautan simbolik) apa adanya. Penyerang dapat mengunggah arsip berisi symlink yang mengarah ke file di luar direktori upload (misalnya <code>/flag.txt</code>), lalu mengakses file tersebut melalui antarmuka web.
+Aplikasi web menerima input parameter pokemon tanpa validasi yang memadai. Parameter ini langsung dimasukkan ke dalam fungsi assert() PHP, yang mengevaluasi string sebagai kode PHP. Kombinasi LFI dan assert() injection memungkinkan eksekusi kode sewenang-wenang pada server.
 </p>
 
-<!-- ----------- 4c. CVSS Score ----------- -->
-  <h3>
-    CVSS Score
-  </h3>
-  <p>
-    <strong>Vector String:</strong> <code>AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N</code>
-  </p>
-  <p>
-    <strong>
-      Hasil Kalkulasi Terminal:
-    </strong>
-  </p>
-  <blockquote>
-    <p>
-      <em>
-        [MASUKKAN SCREENSHOT TERMINAL HASIL RUNNING cvss_calc.py DISINI]
-      </em>
-      <strong>
-        Score: 7.5 (High)
-      </strong>
-    </p>
-  </blockquote>
+<h4>Kode Kerentanan</h4>
+
+<pre>
+if (isset($_GET['pokemon'])) {
+    $file = $_GET['pokemon'];
+    $filepath = './static/' . $file;
+    
+    assert("strpos('$file', '..') === false") or die("Invalid file path.");
+    
+    if (file_exists($filepath)) {
+        include($filepath);
+    } else {
+        echo "<p>File not found.</p>";
+    }
+}
+</pre>
+
   
   <!-- ----------- 4d. Langkah Pengerjaan (Proof of Concept) ----------- -->
   <h3>
@@ -448,55 +443,41 @@ Setelah memasukkan URL di atas, sebuah flag muncul.
   
   <ol>
     <li>
+      <p><strong>Tampilan Awal</strong>: Untuk tampilan awal seperti ini, dengan daftar seperti list disertai gambar ketika klik salah satu daftar tersebut.</p>
+      <img width="953" height="585" alt="image" src="https://github.com/user-attachments/assets/4438f1a1-c952-4575-8b80-7a6140e02164" />
+
+  <img width="954" height="942" alt="image" src="https://github.com/user-attachments/assets/26821f5c-34ae-443d-9b3d-bec2e280d93a" />
+
+<p>Jika dilihat dari URL-nya, kita dapat memasukkan beberapa kode berbahaya ke URL tersebut.</p>
+    </li>
+    <li>
       <p>
-        <strong> Pembuatan Payload (Terminal): </strong> Menggunakan terminal Linux/Mac untuk membuat symlink yang mengarah ke flag, lalu membungkusnya dengan opsi <code>--symlinks</code>.
+       <strong>Identfikasi Parameter yang Rentan</strong>: Kita akan mencoba paramater seperti pad akode di bawah ini. Caranya adalah dengan menambah ke repeater dari <code>GET /?pokemon=Rotom-Wash.html HTTP/1.1</code> (untuk mengapatkan Rotom-Wash cukup dengan mengklik Rotom-Wash pada website.
+      </p>
+
+<img width="764" height="354" alt="image" src="https://github.com/user-attachments/assets/7e0447a1-bc24-4533-9130-cbb13c6a9ec8" />
+      <p>
+      Lalu kita coba memasukkan URL seperti kode di bawah ini, melihat URL dapat diubah setelah <code>/?pokemon=</code>.
       </p>
       <pre>
-        <code>
-          ln -s /flag.txt flag_link
-            zip --symlinks exploit.zip flag_link
-            <br class="ProseMirror-trailingBreak">
-        </code>
+GET /?pokemon=../../../../etc/passwd
       </pre>
-      <blockquote>
-        <p>
-          <em>
-            [MASUKKAN SCREENSHOT TERMINAL SAAT MEMBUAT ZIP]
-          </em>
-        </p>
-      </blockquote>
-    </li>
-    <li>
-      <p>
-        <strong>
-          Upload:
-        </strong>
-Mengunggah file <code>exploit.zip</code> ke aplikasi Eterion Storage.</p>
-    </li>
-    <li>
-      <p>
-        <strong>Akses File:</strong> Mengklik file hasil ekstraksi (<code>flag_link</code>) pada File Manager web.
-      </p>
-      <blockquote>
-        <p>
-          <em>
-            [MASUKKAN SCREENSHOT FILE MANAGER DI WEBSITE]
-          </em>
-        </p>
-      </blockquote>
-    </li>
-    <li>
-      <p>
-        <strong>Hasil:</strong>Browser menampilkan isi dari <code>/flag.txt</code>.
-      </p>
-      <blockquote>
-        <p>
-          <em>
-            [MASUKKAN SCREENSHOT FLAG YANG MUNCUL]
-          </em>
-        </p>
-      </blockquote>
-    </li>
+      
+<img width="1539" height="470" alt="image" src="https://github.com/user-attachments/assets/ad77c7a0-753a-475d-bc62-be7e5bd7a337" />
+
+  <p>Pada gambar di atas, menunjukkan bahwa kita gagal menjalankan kode tersebut. Kita coba yang lain.</p>
+  <pre>
+    GET /?pokemon=test' HTTP/1.1
+  </pre>
+  <p>Dan hasilnya seperti ini.</p>
+
+  <img width="1524" height="749" alt="image" src="https://github.com/user-attachments/assets/6d915ec5-e09a-4226-9117-2a0709c616e8" />
+
+
+  </li>
+  <li>
+         <strong>Identfikasi Parameter yang Rentan</strong>: Kita akan mencoba paramater seperti pad akode di bawah ini. Caranya adalah dengan menambah ke repeater dari <code>GET /?pokemon=Rotom-Wash.html HTTP/1.1</code> (untuk mengapatkan Rotom-Wash cukup dengan mengklik Rotom-Wash pada website.  Selanjut
+  </li> 
   </ol>
 
 <!-- ----------- 4e. Dampak ----------- -->
@@ -504,7 +485,12 @@ Mengunggah file <code>exploit.zip</code> ke aplikasi Eterion Storage.</p>
   Dampak
 </h3>
 <p>
-  Penyerang dapat membaca file apa pun di sistem server yang memiliki izin baca oleh user web server, termasuk konfigurasi server, source code, dan data sensitif lainnya.
+  <ul>
+    <li>Remote Code Execution - Penyerang dapat menjalankan perintah sewenang-wenang</li>
+    <li>Information Disclosure - Dapat membaca file sistem sensitif (/etc/passwd, source code)</li>
+    <li>Privilege Escalation Potential - Melalui SUID binaries yang teridentifikasi</li>
+    <li>Complete Server Compromise - Potensi mengambil alih server sepenuhnya</li>
+  </ul>
 </p>
 
 <!-- ----------- 4f. Mitigasi ----------- -->
