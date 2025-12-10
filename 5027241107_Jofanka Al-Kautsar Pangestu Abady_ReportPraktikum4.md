@@ -1,7 +1,7 @@
 <h1>Laporan Praktikum Ethical Hacking</h1>
 <p><strong>Nama:</strong> Jofanka Al-Kautsar Pangestu Abady</p>
 <p><strong>NRP:</strong> 5027241107</p>
-<p><strong>Tanggal:</strong> Sabtu, 6 Desember 2025</p>
+<p><strong>Tanggal:</strong> 6 Desember 2025 - 10 Desember 2025</p>
 
 <h2>CVE</h2>
 <p>
@@ -490,8 +490,24 @@ GET /?pokemon=../../../../etc/passwd
   </li>
 
   <li>
+    <p><strong>Remode Code Execution:</strong> Kita dapat memasukan kode seperti ini dan hasilnya seperti ini.</p>
 
-    
+    <img width="1541" height="741" alt="image" src="https://github.com/user-attachments/assets/ba804dda-10d9-44ac-a587-9757f8e41dc8" />
+<p>Lalu, kita dapat memasukkan command lain selain id, misalnya seperti ini.</p>
+
+<img width="766" height="292" alt="image" src="https://github.com/user-attachments/assets/a88a90bf-8f32-49d2-a790-4dd5f70c3568" />
+
+<img width="842" height="694" alt="image" src="https://github.com/user-attachments/assets/cf82ff8e-4811-4ee7-981d-16f0d10b2a1a" />
+
+<img width="880" height="337" alt="image" src="https://github.com/user-attachments/assets/c6de6536-9d15-4c11-b58d-8446b9d04e64" />
+
+<img width="946" height="202" alt="image" src="https://github.com/user-attachments/assets/190fdf1d-2803-40a9-909f-4e2c2bf8b251" />
+
+<p>Sehingga sebuah flag ditemukan, yaitu
+<pre>
+  ETHACK{c0ngr4t5_0n_l34rn11n6_h0w_2_r3vsh377}
+</pre>
+</p>    
   </li>
   </ol>
 
