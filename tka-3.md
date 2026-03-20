@@ -31,11 +31,11 @@ NRP/Nama: 5027241107/Jofanka Al-Kautsar pangestu Abady
 
 - Istilah: cloud networking models
 
-  Definisi: Metode 
+  Definisi: Metode yang digunakan untuk membangun jaringan cloud. 
 
 - Istilah: cloud network
 
-  Definisi: 
+  Definisi: Wujud teknis dari sebuah jaringan cloud.
 
 - Istilah: cloud topologies
 
@@ -52,4 +52,11 @@ NRP/Nama: 5027241107/Jofanka Al-Kautsar pangestu Abady
 - Istilah: Cloud Storage Gateway
 
   Definisi: Sebuah perangkat perantara untuk menerjemahkan jaringan cloud dan jaringan lokal.
+
+## **C. Contoh Implementasi**
+Goggle Sign-in tidak hanya digunakan oleh Google saja, tetapi juga perusahaan lain sebagai metode autentikasi, contohnya Zoom, Topokedia, Amazon, dan masih banyak lagi. Hal ini mengimplementasikan Federated Cloud Services, Cloud Standarization, dan autmation & Self-Service.
+
+## **D. Pertanyaan Kritis**
+
+
 
