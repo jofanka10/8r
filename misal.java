@@ -4,6 +4,7 @@ import org.cloudbus.cloudsim.brokers.DatacenterBrokerSimple;
 import org.cloudbus.cloudsim.cloudlets.Cloudlet;
 import org.cloudbus.cloudsim.cloudlets.CloudletSimple;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.datacenters.Datacenter;
 import org.cloudbus.cloudsim.datacenters.DatacenterSimple;
 import org.cloudbus.cloudsim.hosts.Host;
 import org.cloudbus.cloudsim.hosts.HostSimple;
@@ -11,6 +12,7 @@ import org.cloudbus.cloudsim.resources.Pe;
 import org.cloudbus.cloudsim.resources.PeSimple;
 import org.cloudbus.cloudsim.schedulers.cloudlet.CloudletSchedulerSpaceShared;
 import org.cloudbus.cloudsim.utilizationmodels.UtilizationModelDynamic;
+import org.cloudbus.cloudsim.utilizationmodels.UtilizationModelFull;
 import org.cloudbus.cloudsim.vms.Vm;
 import org.cloudbus.cloudsim.vms.VmSimple;
 
@@ -22,7 +24,9 @@ import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * BatchRunner — uji coba skala dataset untuk 3 algoritma penjadwalan.
@@ -32,8 +36,8 @@ import java.util.List;
  * Untuk mengubah jumlah/spek datacenter atau VM, cukup edit bagian
  * KONFIGURASI tanpa menyentuh logika simulasi di bawahnya.
  *
- * Mapping VM -> Host ditentukan eksplisit lewat hostOfVm[] di runOnce()
- * agar penempatan tidak diserahkan ke kebijakan default CloudSim.
+ * VM didistribusikan bergiliran ke seluruh datacenter; kebijakan First-Fit
+ * menentukan host di dalam datacenter yang dituju.
  *
  * Uji coba: n = MIN_N..MAX_N (kelipatan STEP_N), tiap n diulang 3 kali
  * (seed dataset 1/2/3), hasil diekspor ke hasil/results.csv.
@@ -47,7 +51,7 @@ public class BatchRunner {
     // =========================================================
     static final DatacenterSpec[] DC_SPECS = {
         new DatacenterSpec( 2,          8,        100_000,  32_000,  1_000_000,  1_000_000),
-    //  new DatacenterSpec( 3,          4,         50_000,  16_000,  1_000_000,  1_000_000), // contoh DC ke-2
+        new DatacenterSpec( 3,          4,         50_000,  16_000,  1_000_000,  1_000_000), // contoh DC ke-2
     };
 
     // =========================================================
@@ -58,10 +62,10 @@ public class BatchRunner {
     // Jumlah VM yang dibuat mengikuti jumlah baris di VM_SPECS.
     // =========================================================
     static final VmSpec[] VM_SPECS = {
-        new VmSpec(     1_000,   1,    4_096,  10_000,  10_000),  // VM-0 Small
-        new VmSpec(     2_500,   1,    4_096,  10_000,  10_000),  // VM-1 Medium
-        new VmSpec(     5_000,   1,    4_096,  10_000,  10_000),  // VM-2 Large
-        new VmSpec(     7_500,   1,    4_096,  10_000,  10_000),  // VM-3 XLarge
+        new VmSpec(     1_000,   2,    4_096,  10_000,  10_000),  // VM-0 Small
+        new VmSpec(     2_500,   2,    4_096,  10_000,  10_000),  // VM-1 Medium
+        new VmSpec(     5_000,   2,    4_096,  10_000,  10_000),  // VM-2 Large
+        new VmSpec(     7_500,   4,    4_096,  10_000,  10_000),  // VM-3 XLarge
     };
 
 
@@ -112,6 +116,7 @@ public class BatchRunner {
  
 
     public static void main(String[] args) throws IOException {
+        validateInfrastructure();
         String dataDir = args.length > 0 ? args[0] : "Dataset-Sintetik";
         String outFile = args.length > 1 ? args[1] : "results.csv";
 
@@ -128,7 +133,7 @@ public class BatchRunner {
         List<int[]> runPlan = buildRunPlan(csvFiles.size());
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(outFile))) {
-            writer.println("algorithm,n_tasks,rep,dataset_file,makespan,degree_of_imbalance,utilization,throughput,cloudlet_success");
+            writer.println("algorithm,n_tasks,rep,dataset_file,makespan,degree_of_imbalance,utilization,throughput,cloudlet_success,total_vm_mips");
             for (int[] plan : runPlan) {
                 for (String algo : new String[]{"MCT", "FCFS", "MINMIN"}) {
                     String row = runOnce(algo, plan[0], csvFiles.get(plan[1]));
@@ -153,6 +158,58 @@ public class BatchRunner {
         return plan;
     }
 
+    static void validateInfrastructure() {
+        if (DC_SPECS.length == 0 || VM_SPECS.length == 0) {
+            throw new IllegalStateException("Minimal harus ada satu datacenter dan satu VM.");
+        }
+
+        long[][][] free = new long[DC_SPECS.length][][];
+        for (int d = 0; d < DC_SPECS.length; d++) {
+            DatacenterSpec dc = DC_SPECS[d];
+            if (dc.hostCount <= 0 || dc.hostPes <= 0 || dc.hostMips <= 0
+                    || dc.hostRam <= 0 || dc.hostBw <= 0 || dc.hostStorage <= 0) {
+                throw new IllegalStateException("Spesifikasi DC " + (d + 1) + " harus positif.");
+            }
+            free[d] = new long[dc.hostCount][4];
+            for (int h = 0; h < dc.hostCount; h++) {
+                free[d][h] = new long[]{dc.hostPes, dc.hostRam, dc.hostBw, dc.hostStorage};
+            }
+        }
+
+        for (int i = 0; i < VM_SPECS.length; i++) {
+            VmSpec vm = VM_SPECS[i];
+            if (vm.mips <= 0 || vm.vCpu <= 0 || vm.ram <= 0 || vm.bw <= 0 || vm.size <= 0) {
+                throw new IllegalStateException("Spesifikasi VM-" + i + " harus positif.");
+            }
+
+            boolean allocated = false;
+            for (int attempt = 0; attempt < DC_SPECS.length && !allocated; attempt++) {
+                int dcIndex = (i % DC_SPECS.length + attempt) % DC_SPECS.length;
+                DatacenterSpec dc = DC_SPECS[dcIndex];
+                if (dc.hostMips < vm.mips) {
+                    continue;
+                }
+
+                for (long[] host : free[dcIndex]) {
+                    if (host[0] >= vm.vCpu && host[1] >= vm.ram
+                            && host[2] >= vm.bw && host[3] >= vm.size) {
+                        host[0] -= vm.vCpu;
+                        host[1] -= vm.ram;
+                        host[2] -= vm.bw;
+                        host[3] -= vm.size;
+                        allocated = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!allocated) {
+                throw new IllegalStateException(
+                        "VM-" + i + " tidak muat di datacenter mana pun; periksa PE, MIPS per PE, RAM, BW, dan storage.");
+            }
+        }
+    }
+
 
     // =========================================================
     // HELPER: Pembuatan infrastruktur
@@ -175,7 +232,7 @@ public class BatchRunner {
 
     /**
      * Membuat daftar VM dari VM_SPECS.
-     * Setiap VM menggunakan CloudletSchedulerSpaceShared (antri serial per VM).
+     * Setiap VM menggunakan CloudletSchedulerSpaceShared (maksimal satu task per PE).
      */
     static List<Vm> buatVmList() {
         List<Vm> vmList = new ArrayList<>();
@@ -203,42 +260,89 @@ public class BatchRunner {
         CloudSim simulation = new CloudSim();
 
         // --- Buat semua datacenter dari DC_SPECS ---
-        // allHosts menampung seluruh host (lintas DC) untuk keperluan placement VM.
+        List<Datacenter> datacenters = new ArrayList<>();
         for (DatacenterSpec spec : DC_SPECS) {
-            new DatacenterSimple(
+            datacenters.add(new DatacenterSimple(
                 simulation,
                 buatHostList(spec),
-                new VmAllocationPolicyFirstFit());
+                new VmAllocationPolicyFirstFit()));
         }
 
         DatacenterBroker broker = new DatacenterBrokerSimple(simulation);
 
         List<Vm> vmList = buatVmList();
+        Map<Long, Integer> dcAttempts = new HashMap<>();
+        Map<Long, Integer> vmIndexes = new HashMap<>();
+        broker.setDatacenterMapper((lastDatacenter, vm) -> {
+            int attempt = dcAttempts.getOrDefault(vm.getId(), 0);
+            if (attempt >= datacenters.size()) {
+                return Datacenter.NULL;
+            }
+
+            Integer vmIndex = vmIndexes.get(vm.getId());
+            if (vmIndex == null) {
+                throw new IllegalStateException("Indeks VM tidak ditemukan untuk VM " + vm.getId());
+            }
+            int preferredIndex = vmIndex % datacenters.size();
+            int targetIndex = (preferredIndex + attempt) % datacenters.size();
+            Datacenter target = datacenters.get(targetIndex);
+            if (attempt > 0) {
+                int previousIndex = (preferredIndex + attempt - 1) % datacenters.size();
+                System.out.printf(
+                        "[FALLBACK] VM %d tidak muat di DC %d; mencoba DC %d%n",
+                        vm.getId(),
+                        datacenters.get(previousIndex).getId(),
+                        target.getId());
+            }
+            dcAttempts.put(vm.getId(), attempt + 1);
+            return target;
+        });
+
         final boolean[] vmAllocated = new boolean[vmList.size()];
+        boolean[] datacenterUsed = new boolean[datacenters.size()];
         for (int i = 0; i < vmList.size(); i++) {
             final int vmIndex = i;
             vmList.get(i).addOnHostAllocationListener(
-                    info -> vmAllocated[vmIndex] = true);
+                    info -> {
+                        vmAllocated[vmIndex] = true;
+                        int dcIndex = datacenters.indexOf(info.getHost().getDatacenter());
+                        if (dcIndex >= 0) {
+                            datacenterUsed[dcIndex] = true;
+                        }
+                    });
         }
         broker.submitVmList(vmList);
+        for (int i = 0; i < vmList.size(); i++) {
+            vmIndexes.put(vmList.get(i).getId(), i);
+        }
 
         List<Cloudlet> cloudletList = new ArrayList<>();
         for (long len : lengths) {
             cloudletList.add(new CloudletSimple(len, 1)
-                    .setUtilizationModel(new UtilizationModelDynamic(1.0)));
+                    .setUtilizationModelCpu(new UtilizationModelFull()));
         }
 
-        // ==== Penjadwalan: hitung mapping task->VM di luar CloudSim ====
-        double[] ready = new double[vmList.size()];
+        // ==== Penjadwalan: hitung mapping task->VM/PE di luar CloudSim ====
+        double[][] readyByPe = new double[vmList.size()][];
+        double[] vmBusy = new double[vmList.size()];
+        for (int i = 0; i < vmList.size(); i++) {
+            readyByPe[i] = new double[(int) vmList.get(i).getNumberOfPes()];
+        }
         switch (algo) {
-            case "FCFS" -> fcfsAssign(cloudletList, vmList, ready);
-            case "MCT" -> mctAssign(cloudletList, vmList, ready);
-            case "MINMIN" -> minMinAssign(cloudletList, vmList, ready);
+            case "FCFS" -> fcfsAssign(cloudletList, vmList, readyByPe, vmBusy);
+            case "MCT" -> mctAssign(cloudletList, vmList, readyByPe, vmBusy);
+            case "MINMIN" -> minMinAssign(cloudletList, vmList, readyByPe, vmBusy);
             default -> throw new IllegalArgumentException("Algoritma tidak dikenal: " + algo);
         }
 
+        for (Cloudlet cloudlet : cloudletList) {
+            double resourceShare = 0.99 / cloudlet.getVm().getNumberOfPes();
+            cloudlet.setUtilizationModelRam(new UtilizationModelDynamic(resourceShare));
+            cloudlet.setUtilizationModelBw(new UtilizationModelDynamic(resourceShare));
+        }
+
         broker.submitCloudletList(cloudletList);
-                simulation.start();
+        simulation.start();
 
         // Pastikan setiap VM berhasil dialokasikan pada salah satu datacenter.
         for (boolean allocated : vmAllocated) {
@@ -248,8 +352,21 @@ public class BatchRunner {
             }
         }
 
+        for (int i = 0; i < datacenterUsed.length; i++) {
+            if (!datacenterUsed[i]) {
+                System.out.printf(
+                        "[PERINGATAN] Datacenter %d tidak menerima VM (algo=%s, n=%d)%n",
+                        datacenters.get(i).getId(), algo, n);
+            }
+        }
 
         List<Cloudlet> finished = broker.getCloudletFinishedList();
+        if (finished.size() != cloudletList.size()) {
+            throw new IllegalStateException(String.format(
+                    "Simulasi %s n=%d: hanya %d dari %d cloudlet yang selesai.",
+                    algo, n, finished.size(), cloudletList.size()));
+        }
+
         double makespan = 0;
         double busySum = 0;
         for (Cloudlet c : finished) {
@@ -257,91 +374,123 @@ public class BatchRunner {
             busySum += c.getActualCpuTime();
         }
 
-        int m = vmList.size();
         // Degree of Imbalance = (max_j T_j - min_j T_j) / mean_j T_j,
-        // dengan T_j = total waktu sibuk VM j. Array ready[] dari tahap penjadwalan
-        // tepat menyimpan T_j per VM (semua task tiba di t=0), jadi dipakai langsung.
-        // (Koreksi: versi sebelumnya keliru memakai rata-rata finish time seluruh cloudlet.)
-        double tMax = ready[0], tMin = ready[0], tSum = 0;
-        for (double t : ready) {
+        // dengan T_j = total waktu CPU aktif per VM, dijumlahkan dari seluruh PE.
+        double tMax = vmBusy[0], tMin = vmBusy[0], tSum = 0;
+        long totalPes = 0;
+        for (int i = 0; i < vmBusy.length; i++) {
+            double t = vmBusy[i];
             tMax = Math.max(tMax, t);
             tMin = Math.min(tMin, t);
             tSum += t;
+            totalPes += vmList.get(i).getNumberOfPes();
         }
-        double tAvg = tSum / m;
+        double tAvg = tSum / vmBusy.length;
         double di = tAvg > 0 ? (tMax - tMin) / tAvg : 0;
-        double utilization = makespan > 0 ? busySum / (m * makespan) : 0;
+        double utilization = makespan > 0 ? busySum / (totalPes * makespan) : 0;
         double throughput = makespan > 0 ? finished.size() / makespan : 0;
+        double totalVmMips = vmList.stream().mapToDouble(Vm::getTotalMipsCapacity).sum();
 
         return String.format(java.util.Locale.US,
-                "%s,%d,%d,%s,%.2f,%.4f,%.4f,%.6f,%d",
+                "%s,%d,%d,%s,%.2f,%.4f,%.4f,%.6f,%d,%.2f",
                 algo, n, planRep(csvFile), new java.io.File(csvFile).getName(),
-                makespan, di, utilization, throughput, finished.size());
+                makespan, di, utilization, throughput, finished.size(), totalVmMips);
     }
 
-    /** FCFS: task pertama datang, diassign ke VM dengan ready time paling awal. */
-    static void fcfsAssign(List<Cloudlet> cloudlets, List<Vm> vms, double[] ready) {
+    /** FCFS: task berikutnya diberikan ke PE yang paling cepat tersedia. */
+    static void fcfsAssign(List<Cloudlet> cloudlets, List<Vm> vms,
+                           double[][] readyByPe, double[] vmBusy) {
         for (Cloudlet c : cloudlets) {
-            int best = 0;
+            int bestVm = 0, bestPe = 0;
             double earliest = Double.MAX_VALUE;
             for (int j = 0; j < vms.size(); j++) {
-                if (ready[j] < earliest) {
-                    earliest = ready[j];
-                    best = j;
+                for (int p = 0; p < readyByPe[j].length; p++) {
+                    if (readyByPe[j][p] < earliest) {
+                        earliest = readyByPe[j][p];
+                        bestVm = j;
+                        bestPe = p;
+                    }
                 }
             }
-            c.setVm(vms.get(best));
-            ready[best] += c.getLength() / vms.get(best).getMips();
+            double duration = c.getLength() / vms.get(bestVm).getMips();
+            c.setVm(vms.get(bestVm));
+            readyByPe[bestVm][bestPe] += duration;
+            vmBusy[bestVm] += duration;
         }
     }
 
-    /** MCT: tiap task diassign ke VM dengan completion time terkecil. */
-    static void mctAssign(List<Cloudlet> cloudlets, List<Vm> vms, double[] ready) {
+    /** MCT: tiap task diassign ke PE dengan completion time terkecil. */
+    static void mctAssign(List<Cloudlet> cloudlets, List<Vm> vms,
+                          double[][] readyByPe, double[] vmBusy) {
         for (Cloudlet c : cloudlets) {
-            int best = 0;
+            int bestVm = 0, bestPe = 0;
             double minCt = Double.MAX_VALUE;
             for (int j = 0; j < vms.size(); j++) {
-                double ct = ready[j] + c.getLength() / vms.get(j).getMips();
-                if (ct < minCt) {
-                    minCt = ct;
-                    best = j;
+                double duration = c.getLength() / vms.get(j).getMips();
+                for (int p = 0; p < readyByPe[j].length; p++) {
+                    double ct = readyByPe[j][p] + duration;
+                    if (ct < minCt) {
+                        minCt = ct;
+                        bestVm = j;
+                        bestPe = p;
+                    }
                 }
             }
-            c.setVm(vms.get(best));
-            ready[best] = minCt;
+            double duration = c.getLength() / vms.get(bestVm).getMips();
+            c.setVm(vms.get(bestVm));
+            readyByPe[bestVm][bestPe] = minCt;
+            vmBusy[bestVm] += duration;
         }
     }
 
     /** Min-Min: dari semua task tersisa, pasangan (task, VM) dgn CT terkecil dieksekusi duluan.
      *  Persamaan logika dengan versi O(n^2*m) README, tapi pakai array boolean supaya
      *  tetap praktis untuk n = 10.000 (ArrayList.remove O(n) dihapus). */
-    static void minMinAssign(List<Cloudlet> cloudlets, List<Vm> vms, double[] ready) {
+    static void minMinAssign(List<Cloudlet> cloudlets, List<Vm> vms,
+                             double[][] readyByPe, double[] vmBusy) {
         int n = cloudlets.size();
         int m = vms.size();
         boolean[] done = new boolean[n];
-        double[] et = new double[m];
-        for (int j = 0; j < m; j++) et[j] = vms.get(j).getMips();
+        List<Cloudlet> assignmentOrder = new ArrayList<>(n);
 
         for (int assigned = 0; assigned < n; assigned++) {
-            int winC = -1, winV = -1;
+            int winC = -1, winV = -1, winPe = -1;
             double globalMin = Double.MAX_VALUE;
+            double[] earliestReady = new double[m];
+            int[] earliestPe = new int[m];
+            for (int j = 0; j < m; j++) {
+                earliestReady[j] = Double.MAX_VALUE;
+                for (int p = 0; p < readyByPe[j].length; p++) {
+                    if (readyByPe[j][p] < earliestReady[j]) {
+                        earliestReady[j] = readyByPe[j][p];
+                        earliestPe[j] = p;
+                    }
+                }
+            }
+
             for (int i = 0; i < n; i++) {
                 if (done[i]) continue;
                 Cloudlet c = cloudlets.get(i);
-                long len = c.getLength();
                 for (int j = 0; j < m; j++) {
-                    double ct = ready[j] + len / et[j];
+                    double duration = c.getLength() / vms.get(j).getMips();
+                    double ct = earliestReady[j] + duration;
                     if (ct < globalMin) {
                         globalMin = ct;
                         winC = i;
                         winV = j;
+                        winPe = earliestPe[j];
                     }
                 }
             }
-            cloudlets.get(winC).setVm(vms.get(winV));
-            ready[winV] = globalMin;
+            Cloudlet winner = cloudlets.get(winC);
+            winner.setVm(vms.get(winV));
+            assignmentOrder.add(winner);
+            readyByPe[winV][winPe] = globalMin;
+            vmBusy[winV] += winner.getLength() / vms.get(winV).getMips();
             done[winC] = true;
         }
+        cloudlets.clear();
+        cloudlets.addAll(assignmentOrder);
     }
 
     static List<Long> readCsv(String path, int limit) {
